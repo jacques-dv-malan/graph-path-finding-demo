@@ -11,6 +11,11 @@ namespace GraphPathFindingDemo.Core.Pathfinding;
 /// </remarks>
 public sealed class BreadthFirstSearch : ISearchAlgorithm
 {
+    #region Properties
+    /// <inheritdoc />
+    public SearchAlgorithmStyle Style => SearchAlgorithmStyle.BreadthFirstSearch;
+    #endregion Properties
+
     #region Public Methods
     /// <summary>
     /// Searches the graph breadth first, reporting one <see cref="SearchStep"/> per event.
@@ -45,7 +50,7 @@ public sealed class BreadthFirstSearch : ISearchAlgorithm
 
             if (ReferenceEquals(node, end))
             {
-                yield return new SearchStep(node, SearchStepKind.PathFound, distances[node], BuildPath(end, cameFrom));
+                yield return new SearchStep(node, SearchStepKind.PathFound, distances[node], PathBuilder.Build(end, cameFrom));
                 yield break;
             }
 
@@ -64,30 +69,4 @@ public sealed class BreadthFirstSearch : ISearchAlgorithm
         }
     }
     #endregion Public Methods
-
-    #region Private Methods
-    /// <summary>
-    /// Rebuilds the path from the start node to the end node by walking the discovered links
-    /// backwards.
-    /// </summary>
-    /// <param name="end">The node the search finished at.</param>
-    /// <param name="cameFrom">The discovered links, mapping each node to the one it came from.</param>
-    /// <returns>The ordered path from the start node to <paramref name="end"/>.</returns>
-    private static IReadOnlyList<GridNode> BuildPath(
-        GridNode end,
-        Dictionary<GridNode, GridNode?> cameFrom)
-    {
-        var reversed = new List<GridNode>();
-        GridNode? current = end;
-
-        while (current is not null)
-        {
-            reversed.Add(current);
-            current = cameFrom[current];
-        }
-
-        reversed.Reverse();
-        return reversed;
-    }
-    #endregion Private Methods
 }

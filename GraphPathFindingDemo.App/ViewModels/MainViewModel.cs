@@ -68,12 +68,13 @@ public partial class MainViewModel : ObservableObject
 
     #region Instance Fields
     private readonly IGridFactory _factory;
-    private readonly ISearchAlgorithm _algorithm;
+    private readonly IReadOnlyDictionary<SearchAlgorithmStyle, ISearchAlgorithm> _algorithms;
 
     private readonly List<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
     private readonly List<GridNode> _path = [];
     private readonly List<LayoutOption> _layoutOptions = [];
+    private readonly List<SearchAlgorithmOption> _algorithmOptions = [];
 
     private GridScenario _scenario = null!;
     private IEnumerator<SearchStep>? _search;
@@ -115,6 +116,17 @@ public partial class MainViewModel : ObservableObject
     /// Gets the layouts the user can pick from.
     /// </summary>
     public IReadOnlyList<LayoutOption> LayoutOptions => _layoutOptions;
+
+    /// <summary>
+    /// Gets the algorithms the user can pick from.
+    /// </summary>
+    public IReadOnlyList<SearchAlgorithmOption> AlgorithmOptions => _algorithmOptions;
+
+    /// <summary>
+    /// Gets or sets the algorithm the search runs with. Any change resets the search.
+    /// </summary>
+    [ObservableProperty]
+    private SearchAlgorithmStyle _selectedAlgorithm = SearchAlgorithmStyle.BreadthFirstSearch;
 
     /// <summary>
     /// Gets or sets the number of milliseconds between two moves. Values outside the supported
@@ -197,21 +209,39 @@ public partial class MainViewModel : ObservableObject
     /// scenario, so the window is never empty.
     /// </summary>
     /// <param name="factory">The factory producing the scenarios.</param>
-    /// <param name="algorithm">The algorithm searching the scenarios.</param>
+    /// <param name="algorithms">The algorithms the user can pick from. Every algorithm must offer
+    /// a different style.</param>
     /// <exception cref="ArgumentNullException">Any of the arguments is <see langword="null"/>.</exception>
-    public MainViewModel(IGridFactory factory, ISearchAlgorithm algorithm)
+    /// <exception cref="ArgumentException">No algorithm was given.</exception>
+    public MainViewModel(IGridFactory factory, params ISearchAlgorithm[] algorithms)
     {
-        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
-        _algorithm = algorithm ?? throw new ArgumentNullException(nameof(algorithm));
+        ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(algorithms);
+
+        if (algorithms.Length == 0)
+        {
+            throw new ArgumentException("At least one search algorithm is required.", nameof(algorithms));
+        }
+
+        _factory = factory;
+        _algorithms = algorithms.ToDictionary(algorithm => algorithm.Style);
 
         foreach (var style in _factory.AvailableStyles)
         {
             _layoutOptions.Add(LayoutOption.For(style));
         }
 
+        foreach (var algorithm in algorithms)
+        {
+            _algorithmOptions.Add(SearchAlgorithmOption.For(algorithm.Style));
+        }
+
         CompositionTarget.Rendering += OnRendering;
 
         RebuildScenario();
+
+        // The search starts with the first algorithm that was given.
+        SelectedAlgorithm = algorithms[0].Style;
     }
     #endregion Constructor
 
@@ -276,6 +306,15 @@ public partial class MainViewModel : ObservableObject
     partial void OnSelectedLayoutChanged(LayoutStyle value)
     {
         RebuildScenario();
+    }
+
+    /// <summary>
+    /// Restarts the search when the algorithm changes.
+    /// </summary>
+    /// <param name="value">The requested algorithm.</param>
+    partial void OnSelectedAlgorithmChanged(SearchAlgorithmStyle value)
+    {
+        ResetSearch();
     }
 
     /// <summary>
@@ -399,7 +438,7 @@ public partial class MainViewModel : ObservableObject
         _path.Clear();
         _visitedLeaf = null;
 
-        _search = _algorithm.Search(_scenario.Graph, _scenario.Start, _scenario.End).GetEnumerator();
+        _search = _algorithms[SelectedAlgorithm].Search(_scenario.Graph, _scenario.Start, _scenario.End).GetEnumerator();
 
         Status = StatusIdle;
         VisitedCount = 0;

@@ -8,6 +8,11 @@ namespace GraphPathFindingDemo.Core.Pathfinding;
 public interface ISearchAlgorithm
 {
     /// <summary>
+    /// Gets the style of the search, which names it in the algorithm picker.
+    /// </summary>
+    SearchAlgorithmStyle Style { get; }
+
+    /// <summary>
     /// Searches the graph, reporting one <see cref="SearchStep"/> per event as it happens.
     /// </summary>
     /// <param name="graph">The graph to search.</param>

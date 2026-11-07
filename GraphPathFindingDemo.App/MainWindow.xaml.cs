@@ -38,7 +38,10 @@ public partial class MainWindow : Window
             new ForestLayoutGenerator()
         );
 
-        var viewModel = new MainViewModel(factory, new BreadthFirstSearch());
+        var viewModel = new MainViewModel(
+            factory,
+            new BreadthFirstSearch(),
+            new DepthFirstSearch());
 
         DataContext = viewModel;
     }

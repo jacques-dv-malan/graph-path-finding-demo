@@ -52,7 +52,12 @@
                               Margin="0,0,0,12" />
 
                     <TextBlock Text="ALGORITHM" Style="{StaticResource SectionHeader}" />
-                    <TextBlock Text="Breadth-first search" Margin="0,0,0,8" />
+                    <ComboBox ItemsSource="{Binding AlgorithmOptions}"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Style"
+                              SelectedValue="{Binding SelectedAlgorithm}"
+                              IsEnabled="{Binding CanEditGrid}"
+                              Margin="0,0,0,12" />
 
                     <TextBlock Text="ENDPOINTS" Style="{StaticResource SectionHeader}" />
                     <TextBlock Text="Fixed (top-left → bottom-right)" Margin="0,0,0,12" />
