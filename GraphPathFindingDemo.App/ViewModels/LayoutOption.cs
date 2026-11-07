@@ -26,6 +26,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.Wilson => "Wilson",
             LayoutStyle.GrowingTree => "Growing tree",
             LayoutStyle.HuntAndKill => "Hunt-and-kill",
+            LayoutStyle.Braided => "Braided",
             _ => style.ToString()
         };
 

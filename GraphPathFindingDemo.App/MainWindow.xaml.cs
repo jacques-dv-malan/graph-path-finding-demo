@@ -29,7 +29,8 @@ public partial class MainWindow : Window
             new EllerLayoutGenerator(),
             new WilsonLayoutGenerator(),
             new GrowingTreeLayoutGenerator(),
-            new HuntAndKillLayoutGenerator()
+            new HuntAndKillLayoutGenerator(),
+            new BraidedLayoutGenerator()
         );
 
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());

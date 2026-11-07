@@ -41,5 +41,10 @@ public enum LayoutStyle
     /// A tree built by walking at random through the cells that are left, and hunting for a place
     /// to carry on when the walk runs into a dead end.
     /// </summary>
-    HuntAndKill
+    HuntAndKill,
+
+    /// <summary>
+    /// A maze with loops, made by knocking the walls out of the dead ends of a perfect maze.
+    /// </summary>
+    Braided
 }
