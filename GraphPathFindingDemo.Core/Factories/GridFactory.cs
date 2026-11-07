@@ -18,7 +18,7 @@ public sealed class GridFactory : IGridFactory
     /// <summary>
     /// The largest number of rows or columns a grid may have.
     /// </summary>
-    public const int MaxSize = 60;
+    public const int MaxSize = 100;
     #endregion Constants
 
     #region Instance Fields
@@ -67,7 +67,6 @@ public sealed class GridFactory : IGridFactory
     /// <param name="height">The number of rows to generate.</param>
     /// <param name="seed">The seed controlling the generated layout.</param>
     /// <param name="style">The style of the layout to generate.</param>
-    /// <param name="endpointMode">The mode deciding how the endpoints are chosen.</param>
     /// <returns>The created scenario.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// <paramref name="width"/> or <paramref name="height"/> falls outside
@@ -78,8 +77,7 @@ public sealed class GridFactory : IGridFactory
         int width,
         int height,
         int seed,
-        LayoutStyle style = LayoutStyle.RecursiveDivision,
-        EndpointMode endpointMode = EndpointMode.FixedFixed)
+        LayoutStyle style = LayoutStyle.RecursiveDivision)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(width, MinSize);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(width, MaxSize);
@@ -99,7 +97,7 @@ public sealed class GridFactory : IGridFactory
         // The ground the maze stands on decides what a passage costs.
         graph.ApplyHeights(HeightField.Generate(width, height, seed));
 
-        var (start, end) = EndpointSelector.Select(graph, endpointMode, seed);
+        var (start, end) = EndpointSelector.Select(graph);
 
         return new GridScenario(graph, start, end, seed);
     }

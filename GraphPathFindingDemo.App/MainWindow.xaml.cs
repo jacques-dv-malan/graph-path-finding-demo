@@ -1,3 +1,4 @@
+using GraphPathFindingDemo.App.Controls;
 using GraphPathFindingDemo.App.ViewModels;
 using GraphPathFindingDemo.Core.Factories;
 using GraphPathFindingDemo.Core.Layout;
@@ -13,6 +14,10 @@ namespace GraphPathFindingDemo.App;
 /// </summary>
 public partial class MainWindow : Window
 {
+    #region Instance Fields
+    private readonly MainViewModel _viewModel;
+    #endregion Instance Fields
+
     #region Constructor
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class and binds it to a
@@ -38,7 +43,7 @@ public partial class MainWindow : Window
             new ForestLayoutGenerator()
         );
 
-        var viewModel = new MainViewModel(
+        _viewModel = new MainViewModel(
             factory,
             new BreadthFirstSearch(),
             new DepthFirstSearch(),
@@ -50,7 +55,9 @@ public partial class MainWindow : Window
                 new ChebyshevHeuristic(),
                 new OctileHeuristic()));
 
-        DataContext = viewModel;
+        GridCanvas.CellClicked += OnCellClicked;
+
+        DataContext = _viewModel;
     }
     #endregion Constructor
 
@@ -61,12 +68,21 @@ public partial class MainWindow : Window
     /// <param name="e">The event arguments of the close.</param>
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (DataContext is MainViewModel viewModel)
-        {
-            viewModel.Stop();
-        }
+        _viewModel.Stop();
 
         base.OnClosing(e);
     }
     #endregion Overridden Members
+
+    #region Private Methods
+    /// <summary>
+    /// Moves the endpoint the click names to the cell the user clicked on.
+    /// </summary>
+    /// <param name="sender">The canvas the click landed on.</param>
+    /// <param name="e">The arguments of the click.</param>
+    private void OnCellClicked(object? sender, CellClickedEventArgs e)
+    {
+        _viewModel.MoveEndpoint(e.Point, e.Target);
+    }
+    #endregion Private Methods
 }

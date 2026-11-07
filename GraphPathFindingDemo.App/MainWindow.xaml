@@ -29,7 +29,8 @@
             <ColumnDefinition Width="280" />
         </Grid.ColumnDefinitions>
 
-        <controls:GridCanvas Grid.Column="0"
+        <controls:GridCanvas x:Name="GridCanvas"
+                            Grid.Column="0"
                             Background="Transparent"
                             RenderState="{Binding RenderState}" />
 
@@ -65,11 +66,39 @@
                     <ComboBox ItemsSource="{Binding HeuristicOptions}"
                               DisplayMemberPath="Name"
                               SelectedItem="{Binding SelectedHeuristic}"
+                              IsEnabled="{Binding CanEditGrid}"
                               Visibility="{Binding HasHeuristics, Converter={StaticResource BoolToVisibility}}"
                               Margin="0,0,0,12" />
 
                     <TextBlock Text="ENDPOINTS" Style="{StaticResource SectionHeader}" />
-                    <TextBlock Text="Fixed (top-left → bottom-right)" Margin="0,0,0,12" />
+                    <TextBlock Text="Left-click a cell to move the start, right-click to move the end"
+                               Style="{StaticResource ReadOutLabel}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,6" />
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Start" Style="{StaticResource ReadOutLabel}" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Margin="0,3"
+                                 IsReadOnly="True"
+                                 Text="{Binding StartPosition, Mode=OneWay}" />
+
+                        <TextBlock Grid.Row="1" Text="End" Style="{StaticResource ReadOutLabel}" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Margin="0,3"
+                                 IsReadOnly="True"
+                                 Text="{Binding EndPosition, Mode=OneWay}" />
+                    </Grid>
 
                     <TextBlock Text="GRID" Style="{StaticResource SectionHeader}" />
                     <Grid Margin="0,0,0,10">
@@ -88,7 +117,7 @@
                         <Slider Grid.Row="0"
                                 Grid.Column="1"
                                 Minimum="5"
-                                Maximum="60"
+                                Maximum="100"
                                 TickFrequency="1"
                                 SmallChange="1"
                                 IsSnapToTickEnabled="True"
@@ -106,7 +135,7 @@
                         <Slider Grid.Row="1"
                                 Grid.Column="1"
                                 Minimum="5"
-                                Maximum="60"
+                                Maximum="100"
                                 TickFrequency="1"
                                 SmallChange="1"
                                 IsSnapToTickEnabled="True"

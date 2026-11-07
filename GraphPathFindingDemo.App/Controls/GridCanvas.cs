@@ -2,6 +2,7 @@ using GraphPathFindingDemo.App.ViewModels;
 using GraphPathFindingDemo.Core.Graph;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace GraphPathFindingDemo.App.Controls;
@@ -101,8 +102,8 @@ public sealed class GridCanvas : Control
             return;
         }
 
-        var offsetX = (ActualWidth - cellSize * graph.Width) / 2;
-        var offsetY = (ActualHeight - cellSize * graph.Height) / 2;
+        var offsetX = (ActualWidth - (cellSize * graph.Width)) / 2;
+        var offsetY = (ActualHeight - (cellSize * graph.Height)) / 2;
 
         dc.DrawRectangle(
             BackgroundBrush,
@@ -113,6 +114,28 @@ public sealed class GridCanvas : Control
         DrawWalls(dc, graph, offsetX, offsetY, cellSize);
         DrawPath(dc, state, offsetX, offsetY, cellSize);
         DrawMarkers(dc, state, offsetX, offsetY, cellSize);
+    }
+
+    /// <summary>
+    /// Reports the cell the user clicked on with the left button, which moves the start.
+    /// </summary>
+    /// <param name="e">The arguments of the click.</param>
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonDown(e);
+
+        ReportClick(e, EndpointTarget.Start);
+    }
+
+    /// <summary>
+    /// Reports the cell the user clicked on with the right button, which moves the end.
+    /// </summary>
+    /// <param name="e">The arguments of the click.</param>
+    protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseRightButtonDown(e);
+
+        ReportClick(e, EndpointTarget.End);
     }
     #endregion Overridden Members
 
@@ -185,6 +208,59 @@ public sealed class GridCanvas : Control
     #endregion Internal Classes
 
     #region Private Methods
+    /// <summary>
+    /// Reports the cell a click landed on.
+    /// </summary>
+    /// <param name="e">The arguments of the click.</param>
+    /// <param name="target">The endpoint the click moves.</param>
+    private void ReportClick(MouseButtonEventArgs e, EndpointTarget target)
+    {
+        if (TryGetCellAt(e.GetPosition(this), out var point))
+        {
+            CellClicked?.Invoke(this, new CellClickedEventArgs(point, target));
+        }
+    }
+
+    /// <summary>
+    /// Works out which cell of the grid a point lies on.
+    /// </summary>
+    /// <param name="position">The point to place.</param>
+    /// <param name="point">The cell the point lies on.</param>
+    /// <returns><see langword="true"/> when the point lies on a cell of the grid.</returns>
+    private bool TryGetCellAt(Point position, out GridPoint point)
+    {
+        point = default;
+
+        var state = RenderState;
+
+        if (state is null || ActualWidth <= 0 || ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        var graph = state.Scenario.Graph;
+        var cellSize = Math.Min(ActualWidth / graph.Width, ActualHeight / graph.Height);
+
+        if (cellSize <= 0)
+        {
+            return false;
+        }
+
+        var offsetX = (ActualWidth - (cellSize * graph.Width)) / 2;
+        var offsetY = (ActualHeight - (cellSize * graph.Height)) / 2;
+
+        var column = (int)Math.Floor((position.X - offsetX) / cellSize);
+        var row = (int)Math.Floor((position.Y - offsetY) / cellSize);
+
+        if (row < 0 || column < 0 || row >= graph.Height || column >= graph.Width)
+        {
+            return false;
+        }
+
+        point = new GridPoint(row, column);
+        return true;
+    }
+
     /// <summary>
     /// Fills the cells that have been visited and the cells waiting on the frontier.
     /// </summary>
@@ -514,6 +590,11 @@ public sealed class GridCanvas : Control
     #endregion Private Methods
 
     #region Events
+    /// <summary>
+    /// Raised when the user clicks a cell of the grid.
+    /// </summary>
+    public event EventHandler<CellClickedEventArgs>? CellClicked;
+
     /// <summary>
     /// Repaints the canvas when the drawn state is replaced.
     /// </summary>

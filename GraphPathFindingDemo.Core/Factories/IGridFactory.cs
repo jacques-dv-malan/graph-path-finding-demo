@@ -1,4 +1,3 @@
-using GraphPathFindingDemo.Core.Endpoints;
 using GraphPathFindingDemo.Core.Layout;
 
 namespace GraphPathFindingDemo.Core.Factories;
@@ -20,12 +19,10 @@ public interface IGridFactory
     /// <param name="height">The number of rows to generate.</param>
     /// <param name="seed">The seed controlling the generated layout.</param>
     /// <param name="style">The style of the layout to generate.</param>
-    /// <param name="endpointMode">The mode deciding how the endpoints are chosen.</param>
     /// <returns>The created scenario.</returns>
     GridScenario Create(
         int width,
         int height,
         int seed,
-        LayoutStyle style = LayoutStyle.RecursiveDivision,
-        EndpointMode endpointMode = EndpointMode.FixedFixed);
+        LayoutStyle style = LayoutStyle.RecursiveDivision);
 }

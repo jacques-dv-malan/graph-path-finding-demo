@@ -22,6 +22,11 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
 - **The search in motion** — the search is stepped one move at a time. A move colours in one cell:
   the cell the search reaches turns blue, and the neighbours it reveals turn amber. The cyan line
   is the path found at the end.
+- **Endpoints of your own choosing** — the green and the red marker can be moved: a left-click on a
+  cell moves the start there, a right-click moves the end. The two never share a cell: a click on
+  the other endpoint does nothing. They stay where you put them when the maze is rebuilt — a new
+  layout, a new seed or a new grid — and when the search changes. A smaller grid pulls an
+  endpoint that no longer fits back to the bottom-right most cell that is free.
 - **Two searches, side by side** — the algorithm is picked in the side panel: breadth-first search,
   depth-first search, Dijkstra's algorithm or A*. The breadth-first search explores the graph level by
   level, so its frontier grows and the path it finds is the shortest one. The depth-first search
@@ -78,10 +83,13 @@ path between them). Changing it rebuilds the maze and resets the search. |
 search (one branch at a time, any path), Dijkstra (always the cheapest way out, least costly
 path) or A* (guided by a heuristic, the least costly path with far fewer cells looked at).
 Changing it restarts the search. |
+| **Endpoints** | The two read-only fields show where the ends of the search stand. A left-click on the
+grid moves the start, a right-click moves the end; a click on the other endpoint does nothing. The
+endpoints keep their places when the maze or the search changes. |
 | **Heuristic** | The estimate A* trusts: terrain (the distance across the grid plus the climb),
 Manhattan, Euclidean, Chebyshev or Octile. The picker only shows while A* is the chosen algorithm.
 Changing it restarts the search. |
-| **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
+| **Width** / **Height** | Grid size, 5–100 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator and for the terrain. The same seed always produces the same maze and the same ground. A new run starts with the current epoch time in seconds. |
 | **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
 | **Play** / **Pause** | Runs or freezes the search. |
@@ -141,7 +149,6 @@ GraphPathFindingDemo.Core/
 ├─ Terrain/
 │  └─ HeightField.cs
 ├─ Endpoints/
-│  ├─ EndpointMode.cs
 │  └─ EndpointSelector.cs
 └─ Factories/
    ├─ IGridFactory.cs
@@ -161,9 +168,11 @@ GraphPathFindingDemo.App/
 │  ├─ MainViewModel.cs
 │  ├─ RenderState.cs
 │  ├─ LayoutOption.cs
-│  └─ SearchAlgorithmOption.cs
+│  ├─ SearchAlgorithmOption.cs
+│  └─ EndpointTarget.cs
 ├─ Controls/
-│  └─ GridCanvas.cs
+│  ├─ GridCanvas.cs
+│  └─ CellClickedEventArgs.cs
 ├─ App.xaml
 ├─ App.xaml.cs
 ├─ MainWindow.xaml
@@ -186,10 +195,5 @@ them to the `MainViewModel`. There is no DI container.
   implement `IHeuristic` and hand it to the `AStarSearch` in the composition root. It lands in the
   heuristic picker on its own. An estimate has to stay under the truth, or A* can no longer promise
   the cheapest path.
-- **The other endpoint modes** — implement the three remaining branches in `EndpointSelector`
-  (`FixedRandom`, `RandomFixed`, `RandomRandom`); the enum values already exist and the other three
-  throw `NotSupportedException` in v1.
 - **Other terrain** — `HeightField` builds the hills; a different field only has to hand the
   factory another set of heights.
-- **Canvas click interaction** — `GridCanvas` exposes `RenderState` only; a click handler would map
-  a pixel to a node via `Graph.NodeAt`.

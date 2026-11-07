@@ -72,6 +72,9 @@ public partial class MainViewModel : ObservableObject
 
     private IHeuristicSearch? _heuristicSearch;
 
+    private GridPoint? _startPoint;
+    private GridPoint? _endPoint;
+
     private readonly HashSet<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
     private readonly List<GridNode> _path = [];
@@ -123,6 +126,16 @@ public partial class MainViewModel : ObservableObject
     /// Gets the algorithms the user can pick from.
     /// </summary>
     public IReadOnlyList<SearchAlgorithmOption> AlgorithmOptions => _algorithmOptions;
+
+    /// <summary>
+    /// Gets where the start of the search stands.
+    /// </summary>
+    public string StartPosition => $"({_scenario.Start.Row}, {_scenario.Start.Column})";
+
+    /// <summary>
+    /// Gets where the end of the search stands.
+    /// </summary>
+    public string EndPosition => $"({_scenario.End.Row}, {_scenario.End.Column})";
 
     /// <summary>
     /// Gets the heuristics the chosen search can be tuned with. It is empty for the searches that
@@ -272,6 +285,40 @@ public partial class MainViewModel : ObservableObject
     #endregion Constructor
 
     #region Public Methods
+    /// <summary>
+    /// Moves the given endpoint to the given cell and starts the search again.
+    /// </summary>
+    /// <param name="point">The cell the endpoint moves to.</param>
+    /// <param name="target">The endpoint the click moves.</param>
+    public void MoveEndpoint(GridPoint point, EndpointTarget target)
+    {
+        if (!CanEditGrid)
+        {
+            return;
+        }
+
+        var other = target == EndpointTarget.Start ? _scenario.End : _scenario.Start;
+
+        // The two endpoints may never stand on the same cell.
+        if (other.Position == point)
+        {
+            return;
+        }
+
+        if (target == EndpointTarget.Start)
+        {
+            _startPoint = point;
+        }
+        else
+        {
+            _endPoint = point;
+        }
+
+        _scenario = PlaceEndpoints(_scenario);
+
+        ResetSearch();
+    }
+
     /// <summary>
     /// Stops the animation. Called when the window closes.
     /// </summary>
@@ -474,10 +521,86 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     private void RebuildScenario()
     {
-        _scenario = _factory.Create(Width, Height, Seed, SelectedLayout);
+        _scenario = PlaceEndpoints(_factory.Create(Width, Height, Seed, SelectedLayout));
         NodeCount = _scenario.Graph.Nodes.Count;
         EdgeCount = _scenario.Graph.Edges.Count;
         ResetSearch();
+    }
+
+    /// <summary>
+    /// Puts the endpoints of a scenario where the user has left them, keeping them inside the
+    /// grid and apart from each other.
+    /// </summary>
+    /// <param name="scenario">The scenario to place the endpoints in.</param>
+    /// <returns>The scenario with the endpoints in place.</returns>
+    private GridScenario PlaceEndpoints(GridScenario scenario)
+    {
+        var graph = scenario.Graph;
+
+        var startWanted = _startPoint ?? scenario.Start.Position;
+        var endWanted = _endPoint ?? scenario.End.Position;
+
+        var startFits = IsInside(graph, startWanted);
+        var endFits = IsInside(graph, endWanted);
+        var clash = startFits && endFits && startWanted == endWanted;
+
+        GridNode? start = null;
+        GridNode? end = null;
+
+        if (startFits && !clash)
+        {
+            start = graph.NodeAt(startWanted);
+        }
+
+        if (endFits && !clash)
+        {
+            end = graph.NodeAt(endWanted);
+        }
+
+        // An endpoint that could not keep its cell takes the bottom-right most cell that is free.
+        start ??= BottomRightMostFree(graph, end);
+        end ??= BottomRightMostFree(graph, start);
+
+        return scenario with { Start = start, End = end };
+    }
+
+    /// <summary>
+    /// Returns the bottom-right most cell of the grid that is not taken by the other endpoint.
+    /// </summary>
+    /// <param name="graph">The grid to search.</param>
+    /// <param name="taken">The cell the other endpoint stands on, if it has one.</param>
+    /// <returns>The free cell.</returns>
+    /// <exception cref="InvalidOperationException">The grid holds no free cell.</exception>
+    private static GridNode BottomRightMostFree(GridGraph graph, GridNode? taken)
+    {
+        for (var row = graph.Height - 1; row >= 0; row--)
+        {
+            for (var column = graph.Width - 1; column >= 0; column--)
+            {
+                var node = graph.NodeAt(new GridPoint(row, column));
+
+                if (taken is null || !ReferenceEquals(node, taken))
+                {
+                    return node;
+                }
+            }
+        }
+
+        throw new InvalidOperationException("The grid holds no free cell.");
+    }
+
+    /// <summary>
+    /// Determines whether a cell lies inside the grid.
+    /// </summary>
+    /// <param name="graph">The grid the cell has to fit in.</param>
+    /// <param name="point">The cell to place.</param>
+    /// <returns><see langword="true"/> when the cell lies inside the grid.</returns>
+    private static bool IsInside(GridGraph graph, GridPoint point)
+    {
+        return point.Row >= 0
+            && point.Row < graph.Height
+            && point.Column >= 0
+            && point.Column < graph.Width;
     }
 
     /// <summary>
@@ -500,6 +623,9 @@ public partial class MainViewModel : ObservableObject
         FrontierCount = 0;
         PathLength = 0;
         PathCost = 0;
+
+        OnPropertyChanged(nameof(StartPosition));
+        OnPropertyChanged(nameof(EndPosition));
 
         PublishRenderState();
         UpdateCommandStates();
