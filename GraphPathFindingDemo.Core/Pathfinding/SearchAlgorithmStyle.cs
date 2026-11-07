@@ -18,5 +18,11 @@ public enum SearchAlgorithmStyle
     /// <summary>
     /// The search always takes the cheapest way out and finds the least costly path.
     /// </summary>
-    Dijkstra
+    Dijkstra,
+
+    /// <summary>
+    /// The search takes the way that promises the cheapest way to the end, guided by a
+    /// heuristic.
+    /// </summary>
+    AStar
 }

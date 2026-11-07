@@ -10,6 +10,7 @@
         Background="#FF20242B"
         Foreground="#FFE8ECF2">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -57,6 +58,14 @@
                               SelectedValuePath="Style"
                               SelectedValue="{Binding SelectedAlgorithm}"
                               IsEnabled="{Binding CanEditGrid}"
+                              Margin="0,0,0,12" />
+
+                    <TextBlock Text="HEURISTIC" Style="{StaticResource SectionHeader}"
+                               Visibility="{Binding HasHeuristics, Converter={StaticResource BoolToVisibility}}" />
+                    <ComboBox ItemsSource="{Binding HeuristicOptions}"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{Binding SelectedHeuristic}"
+                              Visibility="{Binding HasHeuristics, Converter={StaticResource BoolToVisibility}}"
                               Margin="0,0,0,12" />
 
                     <TextBlock Text="ENDPOINTS" Style="{StaticResource SectionHeader}" />

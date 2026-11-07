@@ -42,7 +42,8 @@ public partial class MainWindow : Window
             factory,
             new BreadthFirstSearch(),
             new DepthFirstSearch(),
-            new DijkstraSearch());
+            new DijkstraSearch(),
+            new AStarSearch(new TerrainHeuristic()));
 
         DataContext = viewModel;
     }

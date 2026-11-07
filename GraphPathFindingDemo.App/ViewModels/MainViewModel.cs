@@ -70,6 +70,8 @@ public partial class MainViewModel : ObservableObject
     private readonly IGridFactory _factory;
     private readonly IReadOnlyDictionary<SearchAlgorithmStyle, ISearchAlgorithm> _algorithms;
 
+    private IHeuristicSearch? _heuristicSearch;
+
     private readonly HashSet<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
     private readonly List<GridNode> _path = [];
@@ -121,6 +123,24 @@ public partial class MainViewModel : ObservableObject
     /// Gets the algorithms the user can pick from.
     /// </summary>
     public IReadOnlyList<SearchAlgorithmOption> AlgorithmOptions => _algorithmOptions;
+
+    /// <summary>
+    /// Gets the heuristics the chosen search can be tuned with. It is empty for the searches that
+    /// have no heuristic.
+    /// </summary>
+    public IReadOnlyList<IHeuristic> HeuristicOptions => _heuristicSearch?.Heuristics ?? [];
+
+    /// <summary>
+    /// Gets whether the chosen search has a heuristic to pick.
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasHeuristics;
+
+    /// <summary>
+    /// Gets or sets the heuristic the search runs with. Any change restarts the search.
+    /// </summary>
+    [ObservableProperty]
+    private IHeuristic? _selectedHeuristic;
 
     /// <summary>
     /// Gets or sets the algorithm the search runs with. Any change resets the search.
@@ -315,11 +335,40 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Restarts the search when the algorithm changes.
+    /// Restarts the search when the algorithm changes, and offers the heuristics of the new
+    /// search.
     /// </summary>
     /// <param name="value">The requested algorithm.</param>
     partial void OnSelectedAlgorithmChanged(SearchAlgorithmStyle value)
     {
+        _heuristicSearch = _algorithms[value] as IHeuristicSearch;
+
+        HasHeuristics = _heuristicSearch is not null;
+        OnPropertyChanged(nameof(HeuristicOptions));
+
+        SelectedHeuristic = _heuristicSearch?.Heuristic;
+
+        ResetSearch();
+    }
+
+    /// <summary>
+    /// Hands the heuristic to the search and restarts it.
+    /// </summary>
+    /// <param name="value">The requested heuristic.</param>
+    partial void OnSelectedHeuristicChanged(IHeuristic? value)
+    {
+        if (_heuristicSearch is null || value is null)
+        {
+            return;
+        }
+
+        if (ReferenceEquals(_heuristicSearch.Heuristic, value))
+        {
+            return;
+        }
+
+        _heuristicSearch.Heuristic = value;
+
         ResetSearch();
     }
 
