@@ -30,6 +30,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.SparseWalls => "Sparse walls",
             LayoutStyle.DenseWalls => "Dense walls",
             LayoutStyle.RoomAndCorridor => "Room and corridor",
+            LayoutStyle.CellularAutomataCaves => "Cellular automata caves",
             _ => style.ToString()
         };
 

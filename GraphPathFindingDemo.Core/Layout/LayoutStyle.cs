@@ -61,5 +61,10 @@ public enum LayoutStyle
     /// <summary>
     /// A maze of rectangular rooms joined by doors.
     /// </summary>
-    RoomAndCorridor
+    RoomAndCorridor,
+
+    /// <summary>
+    /// A maze of caves, made by letting a cellular automaton settle the walls.
+    /// </summary>
+    CellularAutomataCaves
 }
