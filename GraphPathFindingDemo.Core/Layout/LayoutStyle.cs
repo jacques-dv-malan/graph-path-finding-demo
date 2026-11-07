@@ -46,5 +46,15 @@ public enum LayoutStyle
     /// <summary>
     /// A maze with loops, made by knocking the walls out of the dead ends of a perfect maze.
     /// </summary>
-    Braided
+    Braided,
+
+    /// <summary>
+    /// A maze with loops, made by knocking out many of the walls a perfect maze does not need.
+    /// </summary>
+    SparseWalls,
+
+    /// <summary>
+    /// A maze with loops, made by knocking out few of the walls a perfect maze does not need.
+    /// </summary>
+    DenseWalls
 }

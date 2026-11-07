@@ -30,7 +30,9 @@ public partial class MainWindow : Window
             new WilsonLayoutGenerator(),
             new GrowingTreeLayoutGenerator(),
             new HuntAndKillLayoutGenerator(),
-            new BraidedLayoutGenerator()
+            new BraidedLayoutGenerator(),
+            new WallDensityLayoutGenerator(LayoutStyle.SparseWalls, 0.5),
+            new WallDensityLayoutGenerator(LayoutStyle.DenseWalls, 0.1)
         );
 
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());
