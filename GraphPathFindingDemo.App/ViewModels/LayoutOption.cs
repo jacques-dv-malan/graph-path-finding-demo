@@ -21,6 +21,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
         {
             LayoutStyle.RecursiveDivision => "Recursive division",
             LayoutStyle.RecursiveBacktracker => "Recursive backtracker",
+            LayoutStyle.RandomizedPrim => "Randomized Prim",
             _ => style.ToString()
         };
 

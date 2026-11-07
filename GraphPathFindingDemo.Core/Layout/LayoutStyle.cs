@@ -13,5 +13,11 @@ public enum LayoutStyle
     /// <summary>
     /// Corridors carved by a depth-first walk that backtracks when it runs out of room.
     /// </summary>
-    RecursiveBacktracker
+    RecursiveBacktracker,
+
+    /// <summary>
+    /// A blobby tree, grown outwards from a single cell by taking the passages that leave the
+    /// region at random.
+    /// </summary>
+    RandomizedPrim
 }
