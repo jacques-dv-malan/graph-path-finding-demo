@@ -150,6 +150,18 @@ public partial class MainViewModel : ObservableObject
     private bool _hasHeuristics;
 
     /// <summary>
+    /// Gets whether the play button shows.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isPlayVisible = true;
+
+    /// <summary>
+    /// Gets whether the pause button shows.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isPauseVisible;
+
+    /// <summary>
     /// Gets or sets the heuristic the search runs with. Any change restarts the search.
     /// </summary>
     [ObservableProperty]
@@ -851,6 +863,9 @@ public partial class MainViewModel : ObservableObject
         CanPause = _isRunning;
         CanStep = hasSearch && !_isRunning;
         CanEditGrid = !_isRunning;
+
+        IsPlayVisible = !_isRunning;
+        IsPauseVisible = _isRunning;
     }
 
     #endregion Private Methods

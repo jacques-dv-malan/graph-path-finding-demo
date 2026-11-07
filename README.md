@@ -92,7 +92,7 @@ Changing it restarts the search. |
 | **Width** / **Height** | Grid size, 5–100 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator and for the terrain. The same seed always produces the same maze and the same ground. A new run starts with the current epoch time in seconds. |
 | **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
-| **Play** / **Pause** | Runs or freezes the search. |
+| **Play** / **Pause** | Runs or freezes the search. Only one of the two shows at a time: the pause button takes the place of the play button while the search runs. |
 | **Step** | Advances the search by exactly one move. |
 | **Reset** | Returns the *same* maze to its pre-search state so a run can be replayed identically. |
 | **Step interval** | Milliseconds between two moves of the search (0–1000, in steps of 50). Lower is faster. The moves are counted in display frames, so the time between two moves only varies by the jitter of the display. |
