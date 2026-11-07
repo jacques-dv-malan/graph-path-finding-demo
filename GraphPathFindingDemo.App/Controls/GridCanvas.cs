@@ -284,23 +284,70 @@ public sealed class GridCanvas : Control
         _visitedFlags = visited;
         _frontierFlags = frontier;
 
-        for (var row = 0; row < graph.Height; row++)
+        var visitedRuns = BuildRuns(visited, graph.Width, graph.Height, offsetX, offsetY, cellSize);
+        var frontierRuns = BuildRuns(frontier, graph.Width, graph.Height, offsetX, offsetY, cellSize);
+
+        dc.DrawGeometry(VisitedBrush, null, visitedRuns);
+        dc.DrawGeometry(FrontierBrush, null, frontierRuns);
+    }
+
+    /// <summary>
+    /// Builds the geometry of the cells that are flagged, merging the cells that sit next to
+    /// each other into one rectangle.
+    /// </summary>
+    /// <param name="flags">The flag of every cell of the grid.</param>
+    /// <param name="width">The number of columns of the grid.</param>
+    /// <param name="height">The number of rows of the grid.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The frozen geometry of the flagged cells.</returns>
+    private static StreamGeometry BuildRuns(
+        bool[] flags,
+        int width,
+        int height,
+        double offsetX,
+        double offsetY,
+        double cellSize)
+    {
+        var geometry = new StreamGeometry();
+
+        using (var context = geometry.Open())
         {
-            for (var column = 0; column < graph.Width; column++)
+            for (var row = 0; row < height; row++)
             {
-                var index = row * graph.Width + column;
+                var column = 0;
+                var top = offsetY + (row * cellSize);
 
-                if (visited[index])
+                while (column < width)
                 {
-                    dc.DrawRectangle(VisitedBrush, null, CellRect(offsetX, offsetY, cellSize, row, column));
-                }
+                    if (!flags[(row * width) + column])
+                    {
+                        column++;
+                        continue;
+                    }
 
-                if (frontier[index])
-                {
-                    dc.DrawRectangle(FrontierBrush, null, CellRect(offsetX, offsetY, cellSize, row, column));
+                    var start = column;
+
+                    while (column < width && flags[(row * width) + column])
+                    {
+                        column++;
+                    }
+
+                    var left = offsetX + (start * cellSize);
+                    var right = offsetX + (column * cellSize);
+                    var bottom = top + cellSize;
+
+                    context.BeginFigure(new Point(left, top), isFilled: true, isClosed: true);
+                    context.LineTo(new Point(right, top), isStroked: false, isSmoothJoin: false);
+                    context.LineTo(new Point(right, bottom), isStroked: false, isSmoothJoin: false);
+                    context.LineTo(new Point(left, bottom), isStroked: false, isSmoothJoin: false);
                 }
             }
         }
+
+        geometry.Freeze();
+        return geometry;
     }
 
     /// <summary>
@@ -544,20 +591,6 @@ public sealed class GridCanvas : Control
         }
 
         return flags;
-    }
-
-    /// <summary>
-    /// Returns the rectangle covered by a cell.
-    /// </summary>
-    /// <param name="offsetX">The left edge of the grid.</param>
-    /// <param name="offsetY">The top edge of the grid.</param>
-    /// <param name="cellSize">The size of a single cell.</param>
-    /// <param name="row">The row of the cell.</param>
-    /// <param name="column">The column of the cell.</param>
-    /// <returns>The rectangle of the cell.</returns>
-    private static Rect CellRect(double offsetX, double offsetY, double cellSize, int row, int column)
-    {
-        return new Rect(offsetX + column * cellSize, offsetY + row * cellSize, cellSize, cellSize);
     }
 
     /// <summary>

@@ -888,9 +888,6 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // Republishing every frame keeps the rendering loop ticking between moves.
-        PublishRenderState();
-
         var timestamp = Stopwatch.GetTimestamp();
 
         if (Stopwatch.GetElapsedTime(_lastMoveTimestamp, timestamp).TotalMilliseconds < StepIntervalMilliseconds)
