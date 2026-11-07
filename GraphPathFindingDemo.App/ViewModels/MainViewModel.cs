@@ -30,19 +30,14 @@ public partial class MainViewModel : ObservableObject
     public const int DefaultHeight = 25;
 
     /// <summary>
-    /// The seed a new grid starts at.
-    /// </summary>
-    public const int DefaultSeed = 0;
-
-    /// <summary>
     /// The number of milliseconds between two moves a new run starts at.
     /// </summary>
-    public const int DefaultStepIntervalMilliseconds = 50;
+    public const int DefaultStepIntervalMilliseconds = 200;
 
     /// <summary>
     /// The smallest number of milliseconds between two moves.
     /// </summary>
-    public const int MinStepIntervalMilliseconds = 50;
+    public const int MinStepIntervalMilliseconds = 0;
 
     /// <summary>
     /// The largest number of milliseconds between two moves.
@@ -106,7 +101,7 @@ public partial class MainViewModel : ObservableObject
     /// Gets or sets the seed of the layout. Any change rebuilds the scenario.
     /// </summary>
     [ObservableProperty]
-    private int _seed = DefaultSeed;
+    private int _seed = CurrentEpochSeconds();
 
     /// <summary>
     /// Gets or sets the number of milliseconds between two moves. Values outside the supported
@@ -174,6 +169,13 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private bool _canStep;
+
+    /// <summary>
+    /// Gets whether the grid and its seed can be changed. They cannot be changed while the search
+    /// runs.
+    /// </summary>
+    [ObservableProperty]
+    private bool _canEditGrid;
     #endregion Properties
 
     #region Constructor
@@ -265,12 +267,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Builds a new grid and starts a fresh search on it.
+    /// Builds a new grid from a new seed, which is derived from the current one.
     /// </summary>
     [RelayCommand]
     private void NewGrid()
     {
-        Seed = Seed == int.MaxValue ? 0 : Seed + 1;
+        Seed = new Random(Seed).Next();
     }
 
     /// <summary>
@@ -334,6 +336,16 @@ public partial class MainViewModel : ObservableObject
     private void Reset()
     {
         ResetSearch();
+    }
+
+    /// <summary>
+    /// Returns the current time as the number of seconds since the Unix epoch, which is the seed a
+    /// new run starts at.
+    /// </summary>
+    /// <returns>The seed for a new run.</returns>
+    private static int CurrentEpochSeconds()
+    {
+        return (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 
     /// <summary>
@@ -567,6 +579,7 @@ public partial class MainViewModel : ObservableObject
         CanPlay = hasSearch && !_isRunning;
         CanPause = _isRunning;
         CanStep = hasSearch && !_isRunning;
+        CanEditGrid = !_isRunning;
     }
 
     #endregion Private Methods

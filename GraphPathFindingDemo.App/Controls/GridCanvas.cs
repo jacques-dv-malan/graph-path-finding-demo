@@ -329,12 +329,12 @@ public sealed class GridCanvas : Control
                         DrawWall(context, left, top, left, bottom);
                     }
 
-                    if (column + 1 < graph.Width && !passages.Contains((index * nodeCount) + index + 1))
+                    if (column + 1 == graph.Width || !passages.Contains((index * nodeCount) + index + 1))
                     {
                         DrawWall(context, right, top, right, bottom);
                     }
 
-                    if (row + 1 < graph.Height && !passages.Contains((index * nodeCount) + index + graph.Width))
+                    if (row + 1 == graph.Height || !passages.Contains((index * nodeCount) + index + graph.Width))
                     {
                         DrawWall(context, left, bottom, right, bottom);
                     }

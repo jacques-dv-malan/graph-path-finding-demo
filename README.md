@@ -38,12 +38,12 @@ dotnet build -c Release
 | Control | Effect |
 | --- | --- |
 | **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
-| **Seed** | Seed for the layout generator. The same seed always produces the same maze. |
-| **New Grid** | Increments the seed by one and builds a new maze. |
+| **Seed** | Seed for the layout generator. The same seed always produces the same maze. A new run starts with the current epoch time in seconds. |
+| **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
 | **Play** / **Pause** | Runs or freezes the search. |
 | **Step** | Advances the search by exactly one move. |
 | **Reset** | Returns the *same* maze to its pre-search state so a run can be replayed identically. |
-| **Step interval** | Milliseconds between two moves of the search (50–1000, in steps of 50). Lower is faster. The moves are counted in display frames, so the time between two moves only varies by the jitter of the display. |
+| **Step interval** | Milliseconds between two moves of the search (0–1000, in steps of 50). Lower is faster. The moves are counted in display frames, so the time between two moves only varies by the jitter of the display. |
 
 The read-outs show the node and edge counts, how many cells have been visited, the current
 frontier size, the path length in segments, and the status (`idle` / `running` / `done` /

@@ -57,6 +57,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="40" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -64,47 +65,84 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="Width" Style="{StaticResource ReadOutLabel}" />
-                        <TextBox Grid.Row="0"
-                                 Grid.Column="1"
-                                 Margin="0,3"
-                                 Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Row="0" Text="Width" Style="{StaticResource ReadOutLabel}" Margin="0,0,0,4" />
+                        <Slider Grid.Row="0"
+                                Grid.Column="1"
+                                Minimum="5"
+                                Maximum="60"
+                                TickFrequency="1"
+                                SmallChange="1"
+                                IsSnapToTickEnabled="True"
+                                Value="{Binding Width}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,0,4"
+                                IsEnabled="{Binding CanEditGrid}" />
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="2"
+                                   Text="{Binding Width}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,4" />
 
-                        <TextBlock Grid.Row="1" Text="Height" Style="{StaticResource ReadOutLabel}" />
-                        <TextBox Grid.Row="1"
-                                 Grid.Column="1"
-                                 Margin="0,3"
-                                 Text="{Binding Height, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Row="1" Text="Height" Style="{StaticResource ReadOutLabel}" Margin="0,0,0,4" />
+                        <Slider Grid.Row="1"
+                                Grid.Column="1"
+                                Minimum="5"
+                                Maximum="60"
+                                TickFrequency="1"
+                                SmallChange="1"
+                                IsSnapToTickEnabled="True"
+                                Value="{Binding Height}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,0,4"
+                                IsEnabled="{Binding CanEditGrid}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="2"
+                                   Text="{Binding Height}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,4" />
 
                         <TextBlock Grid.Row="2" Text="Seed" Style="{StaticResource ReadOutLabel}" />
                         <TextBox Grid.Row="2"
                                  Grid.Column="1"
+                                 Grid.ColumnSpan="2"
                                  Margin="0,3"
+                                 IsEnabled="{Binding CanEditGrid}"
                                  Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
 
-                    <WrapPanel Margin="0,0,0,12">
-                        <Button Content="New Grid"
-                                Command="{Binding NewGridCommand}"
-                                Margin="0,0,6,6"
-                                Padding="12,4" />
-                        <Button Content="Play"
-                                Command="{Binding PlayCommand}"
-                                Margin="0,0,6,6"
-                                Padding="12,4" />
-                        <Button Content="Pause"
-                                Command="{Binding PauseCommand}"
-                                Margin="0,0,6,6"
-                                Padding="12,4" />
-                        <Button Content="Step"
-                                Command="{Binding StepCommand}"
-                                Margin="0,0,6,6"
-                                Padding="12,4" />
-                        <Button Content="Reset"
-                                Command="{Binding ResetCommand}"
-                                Margin="0,0,6,6"
-                                Padding="12,4" />
-                    </WrapPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <UniformGrid Grid.Row="0" Columns="4" Margin="0,0,0,6">
+                            <Button Content="Play"
+                                    Command="{Binding PlayCommand}"
+                                    Margin="0,0,6,0"
+                                    Padding="12,4" />
+                            <Button Content="Pause"
+                                    Command="{Binding PauseCommand}"
+                                    Margin="0,0,6,0"
+                                    Padding="12,4" />
+                            <Button Content="Step"
+                                    Command="{Binding StepCommand}"
+                                    Margin="0,0,6,0"
+                                    Padding="12,4" />
+                            <Button Content="Reset"
+                                    Command="{Binding ResetCommand}"
+                                    Margin="0"
+                                    Padding="12,4" />
+                        </UniformGrid>
+
+                        <WrapPanel Grid.Row="1">
+                            <Button Content="New Grid"
+                                    Command="{Binding NewGridCommand}"
+                                    IsEnabled="{Binding CanEditGrid}"
+                                    Margin="0,0,6,0"
+                                    Padding="12,4" />
+                        </WrapPanel>
+                    </Grid>
 
                     <TextBlock Text="STEP INTERVAL (ms)" Style="{StaticResource SectionHeader}" />
                     <Grid Margin="0,0,0,12">
@@ -113,7 +151,7 @@
                             <ColumnDefinition Width="40" />
                         </Grid.ColumnDefinitions>
 
-                        <Slider Minimum="50"
+                        <Slider Minimum="0"
                                 Maximum="1000"
                                 TickFrequency="50"
                                 SmallChange="50"
@@ -130,8 +168,9 @@
                     <TextBlock Text="READ-OUTS" Style="{StaticResource SectionHeader}" />
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="40" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -143,22 +182,22 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="Nodes" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding NodeCount}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding NodeCount}" Margin="8,0,0,0" />
 
                         <TextBlock Grid.Row="1" Text="Edges" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EdgeCount}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding EdgeCount}" Margin="8,0,0,0" />
 
                         <TextBlock Grid.Row="2" Text="Visited" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding VisitedCount}" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding VisitedCount}" Margin="8,0,0,0" />
 
                         <TextBlock Grid.Row="3" Text="Frontier" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding FrontierCount}" />
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding FrontierCount}" Margin="8,0,0,0" />
 
                         <TextBlock Grid.Row="4" Text="Path length" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PathLength}" />
+                        <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding PathLength}" Margin="8,0,0,0" />
 
                         <TextBlock Grid.Row="5" Text="Status" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Status}" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding Status}" FontWeight="SemiBold" Margin="8,0,0,0" />
                     </Grid>
 
                     <TextBlock Text="LEGEND" Style="{StaticResource SectionHeader}" />
