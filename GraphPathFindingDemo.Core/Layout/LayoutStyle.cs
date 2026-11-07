@@ -25,5 +25,10 @@ public enum LayoutStyle
     /// A tree built row by row, joining the cells of a row into groups that carry at least one
     /// passage into the next row.
     /// </summary>
-    Eller
+    Eller,
+
+    /// <summary>
+    /// A tree built by walking at random from every cell until the walk reaches the maze.
+    /// </summary>
+    Wilson
 }

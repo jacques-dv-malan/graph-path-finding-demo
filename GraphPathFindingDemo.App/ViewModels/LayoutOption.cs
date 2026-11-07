@@ -23,6 +23,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.RecursiveBacktracker => "Recursive backtracker",
             LayoutStyle.RandomizedPrim => "Randomized Prim",
             LayoutStyle.Eller => "Eller",
+            LayoutStyle.Wilson => "Wilson",
             _ => style.ToString()
         };
 

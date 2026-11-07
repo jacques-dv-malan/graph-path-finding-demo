@@ -26,7 +26,8 @@ public partial class MainWindow : Window
             new RecursiveDivisionLayoutGenerator(),
             new RecursiveBacktrackerLayoutGenerator(),
             new RandomizedPrimLayoutGenerator(),
-            new EllerLayoutGenerator()
+            new EllerLayoutGenerator(),
+            new WilsonLayoutGenerator()
         );
 
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());
