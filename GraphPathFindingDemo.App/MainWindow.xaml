@@ -277,25 +277,36 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Rectangle Grid.Row="0" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.WallBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Wall" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="0" Width="20" Height="12" VerticalAlignment="Center">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="{x:Static controls:GridCanvas.TerrainLowColor}" Offset="0" />
+                                    <GradientStop Color="{x:Static controls:GridCanvas.TerrainHighColor}" Offset="1" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Terrain (low to high)" Margin="8,0,0,0" VerticalAlignment="Center" />
 
-                        <Rectangle Grid.Row="1" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.VisitedBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Visited" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="1" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.WallBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Wall" Margin="8,0,0,0" VerticalAlignment="Center" />
 
-                        <Rectangle Grid.Row="2" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.FrontierBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Frontier (queued)" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="2" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.VisitedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Visited" Margin="8,0,0,0" VerticalAlignment="Center" />
 
-                        <Rectangle Grid.Row="3" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.PathBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Path" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="3" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.FrontierBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Frontier (queued)" Margin="8,0,0,0" VerticalAlignment="Center" />
 
-                        <Rectangle Grid.Row="4" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.StartBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Start" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="4" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.PathBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Path" Margin="8,0,0,0" VerticalAlignment="Center" />
 
-                        <Rectangle Grid.Row="5" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.EndBrush}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="End" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Rectangle Grid.Row="5" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.StartBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Start" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="6" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.EndBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="End" Margin="8,0,0,0" VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
             </ScrollViewer>

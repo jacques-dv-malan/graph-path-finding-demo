@@ -1,5 +1,6 @@
 using GraphPathFindingDemo.App.ViewModels;
 using GraphPathFindingDemo.Core.Graph;
+using GraphPathFindingDemo.Core.Terrain;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,14 +27,25 @@ public sealed class GridCanvas : Control
         new PropertyMetadata(null, OnRenderStateChanged));
 
     /// <summary>
-    /// The colour of the area behind the grid.
+    /// The colour of the lowest ground the terrain reaches.
     /// </summary>
-    public static readonly Brush BackgroundBrush = CreateBrush("#FF14181F");
+    public static readonly Color TerrainLowColor = Color.FromRgb(0x1A, 0x24, 0x36);
 
     /// <summary>
-    /// The colour of a cell that has been visited.
+    /// The colour of the highest ground the terrain reaches.
     /// </summary>
-    public static readonly Brush VisitedBrush = CreateBrush("#FF2E4257");
+    public static readonly Color TerrainHighColor = Color.FromRgb(0x8F, 0xA3, 0xB5);
+
+    /// <summary>
+    /// The colour of every height the terrain can reach, from the lowest to the highest.
+    /// </summary>
+    private static readonly Brush[] TerrainBrushes = BuildTerrainBrushes();
+
+    /// <summary>
+    /// The colour of a cell that has been visited. It is partly transparent, so that the
+    /// ground underneath it still shows.
+    /// </summary>
+    public static readonly Brush VisitedBrush = CreateBrush("#B22E6DB4");
 
     /// <summary>
     /// The colour of a cell waiting on the frontier.
@@ -43,25 +55,26 @@ public sealed class GridCanvas : Control
     /// <summary>
     /// The colour of the walls.
     /// </summary>
-    public static readonly Brush WallBrush = CreateBrush("#FF8A97A8");
+    public static readonly Brush WallBrush = CreateBrush("#FFB4C0D0");
 
     /// <summary>
     /// The colour of the path found.
     /// </summary>
-    public static readonly Brush PathBrush = CreateBrush("#FF54D1DB");
+    public static readonly Brush PathBrush = CreateBrush("#FF5FE3F0");
 
     /// <summary>
     /// The colour of the start marker.
     /// </summary>
-    public static readonly Brush StartBrush = CreateBrush("#FF3FBF50");
+    public static readonly Brush StartBrush = CreateBrush("#FF45E06B");
 
     /// <summary>
     /// The colour of the end marker.
     /// </summary>
-    public static readonly Brush EndBrush = CreateBrush("#FFE03B3B");
+    public static readonly Brush EndBrush = CreateBrush("#FFFF4D5E");
     #endregion Constants
 
     #region Instance Fields
+    private TerrainLayer? _terrain;
     private WallLayer? _walls;
     private bool[] _visitedFlags = [];
     private bool[] _frontierFlags = [];
@@ -105,11 +118,7 @@ public sealed class GridCanvas : Control
         var offsetX = (ActualWidth - (cellSize * graph.Width)) / 2;
         var offsetY = (ActualHeight - (cellSize * graph.Height)) / 2;
 
-        dc.DrawRectangle(
-            BackgroundBrush,
-            null,
-            new Rect(offsetX, offsetY, cellSize * graph.Width, cellSize * graph.Height));
-
+        DrawTerrain(dc, graph, offsetX, offsetY, cellSize);
         DrawCells(dc, state, graph, offsetX, offsetY, cellSize);
         DrawWalls(dc, graph, offsetX, offsetY, cellSize);
         DrawPath(dc, state, offsetX, offsetY, cellSize);
@@ -140,6 +149,64 @@ public sealed class GridCanvas : Control
     #endregion Overridden Members
 
     #region Internal Classes
+    /// <summary>
+    /// The ground of a grid, built once and reused for as long as the grid and the size of a
+    /// cell stay the same.
+    /// </summary>
+    private sealed class TerrainLayer
+    {
+        #region Constructor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TerrainLayer"/> class.
+        /// </summary>
+        /// <param name="graph">The graph the ground belongs to.</param>
+        /// <param name="levels">The geometry of every height of the ground.</param>
+        /// <param name="cellSize">The size of a single cell.</param>
+        /// <param name="offsetX">The left edge of the grid.</param>
+        /// <param name="offsetY">The top edge of the grid.</param>
+        public TerrainLayer(
+            GridGraph graph,
+            StreamGeometry[] levels,
+            double cellSize,
+            double offsetX,
+            double offsetY)
+        {
+            Graph = graph;
+            Levels = levels;
+            CellSize = cellSize;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+        }
+        #endregion Constructor
+
+        #region Properties
+        /// <summary>
+        /// Gets the graph the ground belongs to.
+        /// </summary>
+        public GridGraph Graph { get; }
+
+        /// <summary>
+        /// Gets the geometry of every height of the ground, from the lowest to the highest.
+        /// </summary>
+        public StreamGeometry[] Levels { get; }
+
+        /// <summary>
+        /// Gets the size of a single cell the ground was built for.
+        /// </summary>
+        public double CellSize { get; }
+
+        /// <summary>
+        /// Gets the left edge of the grid the ground was built for.
+        /// </summary>
+        public double OffsetX { get; }
+
+        /// <summary>
+        /// Gets the top edge of the grid the ground was built for.
+        /// </summary>
+        public double OffsetY { get; }
+        #endregion Properties
+    }
+
     /// <summary>
     /// The walls of a grid, built once and reused for as long as the grid and the size of a cell
     /// stay the same.
@@ -262,6 +329,156 @@ public sealed class GridCanvas : Control
     }
 
     /// <summary>
+    /// Fills the cells with the colour that belongs to the height of the ground they stand on.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    private void DrawTerrain(
+        DrawingContext dc,
+        GridGraph graph,
+        double offsetX,
+        double offsetY,
+        double cellSize)
+    {
+        var terrain = GetTerrain(graph, offsetX, offsetY, cellSize);
+
+        for (var level = 0; level < terrain.Levels.Length; level++)
+        {
+            dc.DrawGeometry(TerrainBrushes[level], null, terrain.Levels[level]);
+        }
+    }
+
+    /// <summary>
+    /// Returns the cached ground of the grid, building it when the grid or the size of a cell
+    /// changed.
+    /// </summary>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The ground to draw.</returns>
+    private TerrainLayer GetTerrain(GridGraph graph, double offsetX, double offsetY, double cellSize)
+    {
+        var cached = _terrain;
+
+        if (cached is not null
+            && ReferenceEquals(cached.Graph, graph)
+            && cached.CellSize == cellSize
+            && cached.OffsetX == offsetX
+            && cached.OffsetY == offsetY)
+        {
+            return cached;
+        }
+
+        var layer = new TerrainLayer(
+            graph,
+            BuildTerrainGeometries(graph, offsetX, offsetY, cellSize),
+            cellSize,
+            offsetX,
+            offsetY);
+
+        _terrain = layer;
+        return layer;
+    }
+
+    /// <summary>
+    /// Builds the geometry of the ground of every height the terrain can reach.
+    /// </summary>
+    /// <param name="graph">The graph the ground belongs to.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The frozen geometry of every height, from the lowest to the highest.</returns>
+    private static StreamGeometry[] BuildTerrainGeometries(
+        GridGraph graph,
+        double offsetX,
+        double offsetY,
+        double cellSize)
+    {
+        var heights = HeightField.MaxHeight + 1;
+        var geometries = new StreamGeometry[heights];
+
+        for (var height = 0; height < heights; height++)
+        {
+            var geometry = new StreamGeometry();
+
+            using (var context = geometry.Open())
+            {
+                for (var row = 0; row < graph.Height; row++)
+                {
+                    var column = 0;
+
+                    while (column < graph.Width)
+                    {
+                        if (HeightOf(graph, row, column) != height)
+                        {
+                            column++;
+                            continue;
+                        }
+
+                        var start = column;
+
+                        while (column < graph.Width && HeightOf(graph, row, column) == height)
+                        {
+                            column++;
+                        }
+
+                        AddRun(context, offsetX, offsetY, cellSize, row, start, column);
+                    }
+                }
+            }
+
+            geometry.Freeze();
+            geometries[height] = geometry;
+        }
+
+        return geometries;
+    }
+
+    /// <summary>
+    /// Returns the height of the ground at a place, held within the range the terrain reaches.
+    /// </summary>
+    /// <param name="graph">The graph the ground belongs to.</param>
+    /// <param name="row">The row of the cell.</param>
+    /// <param name="column">The column of the cell.</param>
+    /// <returns>The height of the ground.</returns>
+    private static int HeightOf(GridGraph graph, int row, int column)
+    {
+        var height = graph.Nodes[(row * graph.Width) + column].Height;
+
+        return Math.Clamp(height, 0, HeightField.MaxHeight);
+    }
+
+    /// <summary>
+    /// Builds one brush for every height the terrain can reach.
+    /// </summary>
+    /// <returns>The brush of every height, from the lowest to the highest.</returns>
+    private static Brush[] BuildTerrainBrushes()
+    {
+        var brushes = new Brush[HeightField.MaxHeight + 1];
+
+        for (var height = 0; height < brushes.Length; height++)
+        {
+            var amount = height / (double)HeightField.MaxHeight;
+
+            var colour = Color.FromRgb(
+                (byte)(TerrainLowColor.R + ((TerrainHighColor.R - TerrainLowColor.R) * amount)),
+                (byte)(TerrainLowColor.G + ((TerrainHighColor.G - TerrainLowColor.G) * amount)),
+                (byte)(TerrainLowColor.B + ((TerrainHighColor.B - TerrainLowColor.B) * amount)));
+
+            var brush = new SolidColorBrush(colour);
+            brush.Freeze();
+
+            brushes[height] = brush;
+        }
+
+        return brushes;
+    }
+
+    /// <summary>
     /// Fills the cells that have been visited and the cells waiting on the frontier.
     /// </summary>
     /// <param name="dc">The drawing context to draw into.</param>
@@ -317,7 +534,6 @@ public sealed class GridCanvas : Control
             for (var row = 0; row < height; row++)
             {
                 var column = 0;
-                var top = offsetY + (row * cellSize);
 
                 while (column < width)
                 {
@@ -334,20 +550,43 @@ public sealed class GridCanvas : Control
                         column++;
                     }
 
-                    var left = offsetX + (start * cellSize);
-                    var right = offsetX + (column * cellSize);
-                    var bottom = top + cellSize;
-
-                    context.BeginFigure(new Point(left, top), isFilled: true, isClosed: true);
-                    context.LineTo(new Point(right, top), isStroked: false, isSmoothJoin: false);
-                    context.LineTo(new Point(right, bottom), isStroked: false, isSmoothJoin: false);
-                    context.LineTo(new Point(left, bottom), isStroked: false, isSmoothJoin: false);
+                    AddRun(context, offsetX, offsetY, cellSize, row, start, column);
                 }
             }
         }
 
         geometry.Freeze();
         return geometry;
+    }
+
+    /// <summary>
+    /// Adds a run of cells to the geometry being built, as one rectangle.
+    /// </summary>
+    /// <param name="context">The context of the geometry being built.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <param name="row">The row the run sits in.</param>
+    /// <param name="startColumn">The first column of the run.</param>
+    /// <param name="endColumn">The column just past the run.</param>
+    private static void AddRun(
+        StreamGeometryContext context,
+        double offsetX,
+        double offsetY,
+        double cellSize,
+        int row,
+        int startColumn,
+        int endColumn)
+    {
+        var left = offsetX + (startColumn * cellSize);
+        var right = offsetX + (endColumn * cellSize);
+        var top = offsetY + (row * cellSize);
+        var bottom = top + cellSize;
+
+        context.BeginFigure(new Point(left, top), isFilled: true, isClosed: true);
+        context.LineTo(new Point(right, top), isStroked: false, isSmoothJoin: false);
+        context.LineTo(new Point(right, bottom), isStroked: false, isSmoothJoin: false);
+        context.LineTo(new Point(left, bottom), isStroked: false, isSmoothJoin: false);
     }
 
     /// <summary>
