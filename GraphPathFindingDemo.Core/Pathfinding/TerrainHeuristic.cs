@@ -19,35 +19,29 @@ namespace GraphPathFindingDemo.Core.Pathfinding;
 /// has to look at a cell twice.
 /// </para>
 /// </remarks>
-public sealed class TerrainHeuristic : IHeuristic
+public sealed class TerrainHeuristic : GridDistanceHeuristic
 {
     #region Properties
     /// <inheritdoc />
-    public string Name => "Terrain";
+    public override string Name => "Terrain";
     #endregion Properties
 
-    #region Public Methods
+    #region Protected Methods
     /// <summary>
-    /// Estimates what it costs to walk from one node to another.
+    /// Estimates the cost of the walk between two cells.
     /// </summary>
-    /// <param name="graph">The graph the two nodes belong to.</param>
-    /// <param name="from">The node the walk starts at.</param>
-    /// <param name="to">The node the walk ends at.</param>
+    /// <param name="from">The cell the walk starts at.</param>
+    /// <param name="to">The cell the walk ends at.</param>
     /// <returns>
     /// The distance across the grid plus the difference of the heights of the two cells.
     /// </returns>
-    /// <exception cref="ArgumentNullException">Any of the arguments is <see langword="null"/>.</exception>
-    public int Estimate(GridGraph graph, GridNode from, GridNode to)
+    protected override int Estimate(GridNode from, GridNode to)
     {
-        ArgumentNullException.ThrowIfNull(graph);
-        ArgumentNullException.ThrowIfNull(from);
-        ArgumentNullException.ThrowIfNull(to);
-
         var rows = Math.Abs(from.Row - to.Row);
         var columns = Math.Abs(from.Column - to.Column);
         var climb = Math.Abs(from.Height - to.Height);
 
         return rows + columns + climb;
     }
-    #endregion Public Methods
+    #endregion Protected Methods
 }

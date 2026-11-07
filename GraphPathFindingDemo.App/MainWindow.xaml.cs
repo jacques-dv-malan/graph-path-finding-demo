@@ -43,7 +43,12 @@ public partial class MainWindow : Window
             new BreadthFirstSearch(),
             new DepthFirstSearch(),
             new DijkstraSearch(),
-            new AStarSearch(new TerrainHeuristic()));
+            new AStarSearch(
+                new TerrainHeuristic(),
+                new ManhattanHeuristic(),
+                new EuclideanHeuristic(),
+                new ChebyshevHeuristic(),
+                new OctileHeuristic()));
 
         DataContext = viewModel;
     }

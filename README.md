@@ -39,7 +39,10 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
   A* is the chosen algorithm. The *Terrain* estimate is the distance across the grid plus the
   difference of the heights: every remaining step costs at least one, and the climb a walk makes
   in total is at least the difference of the two heights, so the estimate never promises more than
-  the truth. A* therefore still finds the cheapest path, and it never looks at a cell twice.
+  the truth. A* therefore still finds the cheapest path, and it never looks at a cell twice. The
+  *Manhattan*, *Euclidean*, *Chebyshev* and *Octile* estimates are there for the same reason, and
+  they show what a looser estimate costs: the path comes out the same, but far more cells are
+  looked at.
 - **Why BFS is optimal here** — in a perfect maze the shortest path is the *only* path, so BFS's
   optimality is never confused by a tie-break between equally short routes, and the depth-first
   and the cheapest path are the very same one. The braided, sparse, dense wall, room and corridor
@@ -75,7 +78,8 @@ path between them). Changing it rebuilds the maze and resets the search. |
 search (one branch at a time, any path), Dijkstra (always the cheapest way out, least costly
 path) or A* (guided by a heuristic, the least costly path with far fewer cells looked at).
 Changing it restarts the search. |
-| **Heuristic** | The estimate A* trusts. The picker only shows while A* is the chosen algorithm.
+| **Heuristic** | The estimate A* trusts: terrain (the distance across the grid plus the climb),
+Manhattan, Euclidean, Chebyshev or Octile. The picker only shows while A* is the chosen algorithm.
 Changing it restarts the search. |
 | **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator and for the terrain. The same seed always produces the same maze and the same ground. A new run starts with the current epoch time in seconds. |
@@ -124,7 +128,12 @@ GraphPathFindingDemo.Core/
 │  ├─ PathBuilder.cs
 │  ├─ IHeuristic.cs
 │  ├─ IHeuristicSearch.cs
+│  ├─ GridDistanceHeuristic.cs
 │  ├─ TerrainHeuristic.cs
+│  ├─ ManhattanHeuristic.cs
+│  ├─ EuclideanHeuristic.cs
+│  ├─ ChebyshevHeuristic.cs
+│  ├─ OctileHeuristic.cs
 │  ├─ BreadthFirstSearch.cs
 │  ├─ DepthFirstSearch.cs
 │  ├─ DijkstraSearch.cs
