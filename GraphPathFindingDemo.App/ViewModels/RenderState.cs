@@ -23,7 +23,7 @@ public sealed class RenderState
     /// <param name="path">The path found so far. Empty until the search succeeds.</param>
     public RenderState(
         GridScenario scenario,
-        IReadOnlyList<GridNode> discovered,
+        IReadOnlyCollection<GridNode> discovered,
         IReadOnlyList<GridNode> visited,
         IReadOnlyList<GridNode> path)
     {
@@ -43,7 +43,7 @@ public sealed class RenderState
     /// <summary>
     /// Gets the nodes on the frontier, reached but not yet expanded.
     /// </summary>
-    public IReadOnlyList<GridNode> Discovered { get; }
+    public IReadOnlyCollection<GridNode> Discovered { get; }
 
     /// <summary>
     /// Gets the nodes that have been expanded.

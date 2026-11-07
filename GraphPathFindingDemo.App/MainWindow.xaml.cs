@@ -41,7 +41,8 @@ public partial class MainWindow : Window
         var viewModel = new MainViewModel(
             factory,
             new BreadthFirstSearch(),
-            new DepthFirstSearch());
+            new DepthFirstSearch(),
+            new DijkstraSearch());
 
         DataContext = viewModel;
     }

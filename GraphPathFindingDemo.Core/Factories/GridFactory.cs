@@ -1,5 +1,6 @@
 using GraphPathFindingDemo.Core.Endpoints;
 using GraphPathFindingDemo.Core.Layout;
+using GraphPathFindingDemo.Core.Terrain;
 
 namespace GraphPathFindingDemo.Core.Factories;
 
@@ -94,6 +95,10 @@ public sealed class GridFactory : IGridFactory
         }
 
         var graph = layout.Generate(width, height, seed);
+
+        // The ground the maze stands on decides what a passage costs.
+        graph.ApplyHeights(HeightField.Generate(width, height, seed));
+
         var (start, end) = EndpointSelector.Select(graph, endpointMode, seed);
 
         return new GridScenario(graph, start, end, seed);

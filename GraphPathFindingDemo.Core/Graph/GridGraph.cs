@@ -14,6 +14,7 @@ public sealed class GridGraph
     #region Instance Fields
     private readonly Dictionary<GridPoint, GridNode> _nodesByPoint;
     private readonly Dictionary<int, List<GridNode>> _adjacency;
+    private readonly Dictionary<(int, int), GridEdge> _passages;
     private readonly List<GridEdge> _edges;
     #endregion Instance Fields
 
@@ -59,6 +60,7 @@ public sealed class GridGraph
         var nodes = new List<GridNode>(width * height);
         _nodesByPoint = new Dictionary<GridPoint, GridNode>(width * height);
         _adjacency = new Dictionary<int, List<GridNode>>(width * height);
+        _passages = new Dictionary<(int, int), GridEdge>();
         _edges = new List<GridEdge>();
 
         for (var row = 0; row < height; row++)
@@ -135,6 +137,27 @@ public sealed class GridGraph
     {
         return _adjacency[node.Index].AsReadOnly();
     }
+
+    /// <summary>
+    /// Returns what it costs to walk from one node to the next.
+    /// </summary>
+    /// <param name="a">The node the walk starts at.</param>
+    /// <param name="b">The node the walk ends at.</param>
+    /// <returns>The cost of the passage between the two nodes.</returns>
+    /// <exception cref="ArgumentException">
+    /// The two nodes are not joined by a passage.
+    /// </exception>
+    public int WeightBetween(GridNode a, GridNode b)
+    {
+        if (!_passages.TryGetValue(PassageKey(a, b), out var passage))
+        {
+            throw new ArgumentException(
+                $"There is no passage between ({a.Row}, {a.Column}) and ({b.Row}, {b.Column}).",
+                nameof(a));
+        }
+
+        return passage.Weight;
+    }
     #endregion Public Methods
 
     #region Internal Methods
@@ -143,11 +166,12 @@ public sealed class GridGraph
     /// </summary>
     /// <param name="a">The first node of the passage.</param>
     /// <param name="b">The second node of the passage.</param>
+    /// <param name="weight">The cost of walking the passage. The terrain sets it later.</param>
     /// <exception cref="ArgumentException">
     /// A node does not belong to this graph, or the two nodes are not orthogonal neighbours.
     /// </exception>
     /// <exception cref="InvalidOperationException">The two nodes are already connected.</exception>
-    internal void Connect(GridNode a, GridNode b)
+    internal void Connect(GridNode a, GridNode b, int weight = 1)
     {
         if (!Owns(a) || !Owns(b))
         {
@@ -167,13 +191,68 @@ public sealed class GridGraph
                 $"Nodes ({a.Row}, {a.Column}) and ({b.Row}, {b.Column}) are already connected.");
         }
 
+        var passage = new GridEdge(a, b) { Weight = weight };
+
         _adjacency[a.Index].Add(b);
         _adjacency[b.Index].Add(a);
-        _edges.Add(new GridEdge(a, b));
+        _passages.Add(PassageKey(a, b), passage);
+        _edges.Add(passage);
+    }
+
+    /// <summary>
+    /// Sets the height of every cell and works out what each passage costs from it.
+    /// </summary>
+    /// <param name="heights">The height of every cell, row by row.</param>
+    /// <exception cref="ArgumentException">
+    /// There is not exactly one height for every node of the graph.
+    /// </exception>
+    internal void ApplyHeights(IReadOnlyList<int> heights)
+    {
+        ArgumentNullException.ThrowIfNull(heights);
+
+        if (heights.Count != Nodes.Count)
+        {
+            throw new ArgumentException(
+                $"The graph holds {Nodes.Count} nodes, but {heights.Count} heights were given.",
+                nameof(heights));
+        }
+
+        for (var index = 0; index < Nodes.Count; index++)
+        {
+            Nodes[index].Height = heights[index];
+        }
+
+        foreach (var passage in _passages.Values)
+        {
+            passage.Weight = CostOf(passage.From, passage.To);
+        }
     }
     #endregion Internal Methods
 
     #region Private Methods
+    /// <summary>
+    /// Returns the key a passage is filed under, which is the same in both directions.
+    /// </summary>
+    /// <param name="a">The first node of the passage.</param>
+    /// <param name="b">The second node of the passage.</param>
+    /// <returns>The key of the passage between the two nodes.</returns>
+    private static (int, int) PassageKey(GridNode a, GridNode b)
+    {
+        return (Math.Min(a.Index, b.Index), Math.Max(a.Index, b.Index));
+    }
+
+    /// <summary>
+    /// Returns what it costs to walk from one cell to the next: one for the step itself, plus
+    /// the climb between the two cells.
+    /// </summary>
+    /// <param name="a">The cell the walk starts at.</param>
+    /// <param name="b">The cell the walk ends at.</param>
+    /// <returns>The cost of the walk.</returns>
+    private static int CostOf(GridNode a, GridNode b)
+    {
+        return 1 + Math.Abs(a.Height - b.Height);
+    }
+
     /// <summary>
     /// Determines whether the given node is one of this graph's own nodes.
     /// </summary>

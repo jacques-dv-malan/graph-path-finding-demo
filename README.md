@@ -22,17 +22,24 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
 - **The search in motion** — the search is stepped one move at a time. A move colours in one cell:
   the cell the search reaches turns blue, and the neighbours it reveals turn amber. The cyan line
   is the path found at the end.
-- **Two searches, side by side** — the algorithm is picked in the side panel: breadth-first search
-  or depth-first search. The breadth-first search explores the graph level by level, so its frontier
-  grows and the path it finds is the shortest one. The depth-first search follows one branch as
-  deep as it goes before it backtracks, so its frontier holds a single cell and the path it finds
-  is often a longer way round.
+- **Two searches, side by side** — the algorithm is picked in the side panel: breadth-first search,
+  depth-first search or Dijkstra's algorithm. The breadth-first search explores the graph level by
+  level, so its frontier grows and the path it finds is the shortest one. The depth-first search
+  follows one branch as deep as it goes before it backtracks, so its frontier holds a single cell
+  and the path it finds is often a longer way round. Dijkstra always leaves the cheapest cell it
+  knows, so it finds the least costly path.
+- **The ground under the maze** — the cells do not all stand at the same height. The terrain is a
+  field of hills that the same seed always builds the same way, and a passage costs one for the
+  step plus the climb between its two cells. The read-out *Path cost* adds up what the passages of
+  the path cost, so it is worth more than the number of cells on it. In a maze with loops the
+  cheapest path and the shortest one can differ: the shortest one may climb more than the cheapest
+  one, and it is worth more.
 - **Why BFS is optimal here** — in a perfect maze the shortest path is the *only* path, so BFS's
   optimality is never confused by a tie-break between equally short routes, and the depth-first
-  search finds the very same path. The braided, sparse, dense wall, room and corridor and cave
-  mazes are the exceptions: they have loops, so several routes of the same length may lead to the
-  end, and the depth-first search can come out with a longer path than the shortest one. The
-  forest maze goes further: it has no path at all, and the status reads `no path`.
+  and the cheapest path are the very same one. The braided, sparse, dense wall, room and corridor
+  and cave mazes are the exceptions: they have loops, so several routes of the same length may
+  lead to the end, and the searches can come out with different paths. The forest maze goes
+  further: it has no path at all, and the status reads `no path`.
 
 ## Requirements
 
@@ -58,10 +65,11 @@ dotnet build -c Release
 | **Layout** | The maze generator: recursive division (boxes and corridors), recursive backtracker (long corridors), randomized Prim (blobby), Eller (row by row), Wilson (evenly drawn), growing tree (bushy), hunt-and-kill (long winding passages), braided (no dead ends), sparse walls (open), dense walls (narrow), room and corridor (open rooms joined by doors) or
 cellular automata caves (organic caves with rock between them) or forest (separate groves, no
 path between them). Changing it rebuilds the maze and resets the search. |
-| **Algorithm** | The search: breadth-first search (level by level, shortest path) or depth-first
-search (one branch at a time, any path). Changing it restarts the search. |
+| **Algorithm** | The search: breadth-first search (level by level, shortest path), depth-first
+search (one branch at a time, any path) or Dijkstra (always the cheapest way out, least costly
+path). Changing it restarts the search. |
 | **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
-| **Seed** | Seed for the layout generator. The same seed always produces the same maze. A new run starts with the current epoch time in seconds. |
+| **Seed** | Seed for the layout generator and for the terrain. The same seed always produces the same maze and the same ground. A new run starts with the current epoch time in seconds. |
 | **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
 | **Play** / **Pause** | Runs or freezes the search. |
 | **Step** | Advances the search by exactly one move. |
@@ -69,8 +77,8 @@ search (one branch at a time, any path). Changing it restarts the search. |
 | **Step interval** | Milliseconds between two moves of the search (0–1000, in steps of 50). Lower is faster. The moves are counted in display frames, so the time between two moves only varies by the jitter of the display. |
 
 The read-outs show the node and edge counts, how many cells have been visited, the current
-frontier size, the path length in segments, and the status (`idle` / `running` / `done` /
-`no path`).
+frontier size, the path length in segments, what the path costs to walk, and the status (`idle` /
+`running` / `done` / `no path`).
 
 ## Solution layout
 
@@ -106,7 +114,10 @@ GraphPathFindingDemo.Core/
 │  ├─ SearchStepKind.cs
 │  ├─ PathBuilder.cs
 │  ├─ BreadthFirstSearch.cs
-│  └─ DepthFirstSearch.cs
+│  ├─ DepthFirstSearch.cs
+│  └─ DijkstraSearch.cs
+├─ Terrain/
+│  └─ HeightField.cs
 ├─ Endpoints/
 │  ├─ EndpointMode.cs
 │  └─ EndpointSelector.cs
@@ -146,12 +157,13 @@ them to the `MainViewModel`. There is no DI container.
   `ILayoutGenerator` and return a `GridGraph` built with `Connect`. A generator names the layout
   it produces through `ILayoutGenerator.Style`; add it to the list the `GridFactory` is built
   with and it appears in the layout picker.
-- **Another algorithm** (Dijkstra, A*) — implement `ISearchAlgorithm` and name it through
+- **Another algorithm** (A*) — implement `ISearchAlgorithm` and name it through
   `ISearchAlgorithm.Style`. `MainViewModel` takes the searches it offers as a list, so adding one
   to the composition root in `MainWindow` puts it in the algorithm picker.
 - **The other endpoint modes** — implement the three remaining branches in `EndpointSelector`
   (`FixedRandom`, `RandomFixed`, `RandomRandom`); the enum values already exist and the other three
   throw `NotSupportedException` in v1.
-- **Weighted edges** — `GridEdge.Weight` already exists; only the algorithms change.
+- **Other terrain** — `HeightField` builds the hills; a different field only has to hand the
+  factory another set of heights.
 - **Canvas click interaction** — `GridCanvas` exposes `RenderState` only; a click handler would map
   a pixel to a node via `Graph.NodeAt`.

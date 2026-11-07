@@ -29,9 +29,15 @@ public sealed class GridNode
     public int Row => Position.Row;
 
     /// <summary>
-    /// Gets the column of this node.
+    /// Gets the column index of this node.
     /// </summary>
     public int Column => Position.Column;
+
+    /// <summary>
+    /// Gets or sets the height of the ground this node stands on. The terrain sets it, and the
+    /// search reads it to work out what a passage costs.
+    /// </summary>
+    public int Height { get; internal set; }
     #endregion Properties
 
     #region Constructor

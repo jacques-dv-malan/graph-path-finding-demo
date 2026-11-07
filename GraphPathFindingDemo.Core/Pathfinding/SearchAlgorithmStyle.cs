@@ -13,5 +13,10 @@ public enum SearchAlgorithmStyle
     /// <summary>
     /// The search follows one branch as deep as it goes and finds any path.
     /// </summary>
-    DepthFirstSearch
+    DepthFirstSearch,
+
+    /// <summary>
+    /// The search always takes the cheapest way out and finds the least costly path.
+    /// </summary>
+    Dijkstra
 }

@@ -451,7 +451,7 @@ public sealed class GridCanvas : Control
     /// <param name="nodes">The nodes to index.</param>
     /// <param name="count">The number of nodes in the graph.</param>
     /// <returns>A flag per node index, set for every node in <paramref name="nodes"/>.</returns>
-    private static bool[] CreateFlags(bool[] flags, IReadOnlyList<GridNode> nodes, int count)
+    private static bool[] CreateFlags(bool[] flags, IReadOnlyCollection<GridNode> nodes, int count)
     {
         if (flags.Length != count)
         {

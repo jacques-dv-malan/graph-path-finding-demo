@@ -70,7 +70,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IGridFactory _factory;
     private readonly IReadOnlyDictionary<SearchAlgorithmStyle, ISearchAlgorithm> _algorithms;
 
-    private readonly List<GridNode> _discovered = [];
+    private readonly HashSet<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
     private readonly List<GridNode> _path = [];
     private readonly List<LayoutOption> _layoutOptions = [];
@@ -158,6 +158,12 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private int _pathLength;
+
+    /// <summary>
+    /// Gets what the path found so far costs to walk, counted over the passages it runs through.
+    /// </summary>
+    [ObservableProperty]
+    private int _pathCost;
 
     /// <summary>
     /// Gets the number of nodes in the current grid.
@@ -444,6 +450,7 @@ public partial class MainViewModel : ObservableObject
         VisitedCount = 0;
         FrontierCount = 0;
         PathLength = 0;
+        PathCost = 0;
 
         PublishRenderState();
         UpdateCommandStates();
@@ -588,8 +595,31 @@ public partial class MainViewModel : ObservableObject
                     _path.AddRange(step.Path);
                 }
 
+                PathCost = MeasureCost(step.Path);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Works out what a path costs to walk, by adding up what its passages cost.
+    /// </summary>
+    /// <param name="path">The path to measure.</param>
+    /// <returns>The cost of the path.</returns>
+    private int MeasureCost(IReadOnlyList<GridNode>? path)
+    {
+        if (path is null || path.Count < 2)
+        {
+            return 0;
+        }
+
+        var cost = 0;
+
+        for (var index = 0; index + 1 < path.Count; index++)
+        {
+            cost += _scenario.Graph.WeightBetween(path[index], path[index + 1]);
+        }
+
+        return cost;
     }
 
     /// <summary>

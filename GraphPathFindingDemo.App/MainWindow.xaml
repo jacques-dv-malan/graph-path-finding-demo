@@ -189,6 +189,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="Nodes" Style="{StaticResource ReadOutLabel}" />
@@ -206,8 +207,11 @@
                         <TextBlock Grid.Row="4" Text="Path length" Style="{StaticResource ReadOutLabel}" />
                         <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding PathLength}" Margin="8,0,0,0" />
 
-                        <TextBlock Grid.Row="5" Text="Status" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding Status}" FontWeight="SemiBold" Margin="8,0,0,0" />
+                        <TextBlock Grid.Row="5" Text="Path cost" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding PathCost}" Margin="8,0,0,0" />
+
+                        <TextBlock Grid.Row="6" Text="Status" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding Status}" FontWeight="SemiBold" Margin="8,0,0,0" />
                     </Grid>
 
                     <TextBlock Text="LEGEND" Style="{StaticResource SectionHeader}" />
