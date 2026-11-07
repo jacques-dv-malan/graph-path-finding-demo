@@ -25,7 +25,8 @@ public partial class MainWindow : Window
         var factory = new GridFactory(
             new RecursiveDivisionLayoutGenerator(),
             new RecursiveBacktrackerLayoutGenerator(),
-            new RandomizedPrimLayoutGenerator()
+            new RandomizedPrimLayoutGenerator(),
+            new EllerLayoutGenerator()
         );
 
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());

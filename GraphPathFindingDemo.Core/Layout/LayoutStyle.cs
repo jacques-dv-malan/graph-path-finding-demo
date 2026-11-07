@@ -19,5 +19,11 @@ public enum LayoutStyle
     /// A blobby tree, grown outwards from a single cell by taking the passages that leave the
     /// region at random.
     /// </summary>
-    RandomizedPrim
+    RandomizedPrim,
+
+    /// <summary>
+    /// A tree built row by row, joining the cells of a row into groups that carry at least one
+    /// passage into the next row.
+    /// </summary>
+    Eller
 }
