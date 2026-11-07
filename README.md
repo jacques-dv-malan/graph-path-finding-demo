@@ -68,7 +68,7 @@ GraphPathFindingDemo.Core/
 │  ├─ ISearchAlgorithm.cs
 │  ├─ SearchStep.cs
 │  ├─ SearchStepKind.cs
-│  └─ BfsSearch.cs
+│  └─ BreadthFirstSearch.cs
 ├─ Endpoints/
 │  ├─ EndpointMode.cs
 │  └─ EndpointSelector.cs
@@ -97,7 +97,7 @@ GraphPathFindingDemo.App/
 └─ MainWindow.xaml.cs
 ```
 
-`MainWindow` is the composition root: it creates the `GridFactory` and the `BfsSearch` and hands
+`MainWindow` is the composition root: it creates the `GridFactory` and the `BreadthFirstSearch` and hands
 them to the `MainViewModel`. There is no DI container.
 
 ## Extension points

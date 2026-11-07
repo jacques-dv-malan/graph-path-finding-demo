@@ -1,33 +1,81 @@
+using GraphPathFindingDemo.App.ViewModels;
+using GraphPathFindingDemo.Core.Graph;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GraphPathFindingDemo.App.ViewModels;
-using GraphPathFindingDemo.Core.Graph;
 
 namespace GraphPathFindingDemo.App.Controls;
 
+/// <summary>
+/// Draws the grid, the search progress and the path found.
+/// </summary>
+/// <remarks>
+/// The canvas holds no algorithm logic: it only turns a <see cref="RenderState"/> into shapes.
+/// </remarks>
 public sealed class GridCanvas : Control
 {
+    #region Constants
+    /// <summary>
+    /// Identifies the <see cref="RenderState"/> dependency property.
+    /// </summary>
     public static readonly DependencyProperty RenderStateProperty = DependencyProperty.Register(
         nameof(RenderState),
         typeof(RenderState),
         typeof(GridCanvas),
         new PropertyMetadata(null, OnRenderStateChanged));
 
+    /// <summary>
+    /// The colour of the area behind the grid.
+    /// </summary>
     public static readonly Brush BackgroundBrush = CreateBrush("#FF14181F");
-    public static readonly Brush VisitedBrush = CreateBrush("#FF2E4257");
-    public static readonly Brush FrontierBrush = CreateBrush("#FFD79330");
-    public static readonly Brush WallBrush = CreateBrush("#FF8A97A8");
-    public static readonly Brush PathBrush = CreateBrush("#FF54D1DB");
-    public static readonly Brush StartBrush = CreateBrush("#FF3FBF50");
-    public static readonly Brush EndBrush = CreateBrush("#FFE03B3B");
 
+    /// <summary>
+    /// The colour of a cell that has been visited.
+    /// </summary>
+    public static readonly Brush VisitedBrush = CreateBrush("#FF2E4257");
+
+    /// <summary>
+    /// The colour of a cell waiting on the frontier.
+    /// </summary>
+    public static readonly Brush FrontierBrush = CreateBrush("#FFD79330");
+
+    /// <summary>
+    /// The colour of the walls.
+    /// </summary>
+    public static readonly Brush WallBrush = CreateBrush("#FF8A97A8");
+
+    /// <summary>
+    /// The colour of the path found.
+    /// </summary>
+    public static readonly Brush PathBrush = CreateBrush("#FF54D1DB");
+
+    /// <summary>
+    /// The colour of the start marker.
+    /// </summary>
+    public static readonly Brush StartBrush = CreateBrush("#FF3FBF50");
+
+    /// <summary>
+    /// The colour of the end marker.
+    /// </summary>
+    public static readonly Brush EndBrush = CreateBrush("#FFE03B3B");
+    #endregion Constants
+
+    #region Properties
+    /// <summary>
+    /// Gets or sets the state being drawn. Replacing the value repaints the canvas.
+    /// </summary>
     public RenderState? RenderState
     {
         get => (RenderState?)GetValue(RenderStateProperty);
         set => SetValue(RenderStateProperty, value);
     }
+    #endregion Properties
 
+    #region Overridden Members
+    /// <summary>
+    /// Draws the grid, the search progress and the path found.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
     protected override void OnRender(DrawingContext dc)
     {
         base.OnRender(dc);
@@ -60,7 +108,18 @@ public sealed class GridCanvas : Control
         DrawPath(dc, state, offsetX, offsetY, cellSize);
         DrawMarkers(dc, state, offsetX, offsetY, cellSize);
     }
+    #endregion Overridden Members
 
+    #region Private Methods
+    /// <summary>
+    /// Fills the cells that have been visited and the cells waiting on the frontier.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
+    /// <param name="state">The state being drawn.</param>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
     private static void DrawCells(
         DrawingContext dc,
         RenderState state,
@@ -91,6 +150,14 @@ public sealed class GridCanvas : Control
         }
     }
 
+    /// <summary>
+    /// Strokes every cell edge that has no passage running along it.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
     private static void DrawWalls(
         DrawingContext dc,
         GridGraph graph,
@@ -140,6 +207,14 @@ public sealed class GridCanvas : Control
         }
     }
 
+    /// <summary>
+    /// Strokes the path found as a polyline through the centres of the cells it runs through.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
+    /// <param name="state">The state being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
     private static void DrawPath(
         DrawingContext dc,
         RenderState state,
@@ -180,6 +255,14 @@ public sealed class GridCanvas : Control
         dc.DrawGeometry(null, pen, geometry);
     }
 
+    /// <summary>
+    /// Draws the marker on the start node and the marker on the end node.
+    /// </summary>
+    /// <param name="dc">The drawing context to draw into.</param>
+    /// <param name="state">The state being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
     private static void DrawMarkers(
         DrawingContext dc,
         RenderState state,
@@ -196,6 +279,12 @@ public sealed class GridCanvas : Control
         dc.DrawEllipse(EndBrush, null, endCentre, radius, radius);
     }
 
+    /// <summary>
+    /// Turns a list of nodes into a lookup of the node indexes it holds.
+    /// </summary>
+    /// <param name="nodes">The nodes to index.</param>
+    /// <param name="count">The number of nodes in the graph.</param>
+    /// <returns>A flag per node index, set for every node in <paramref name="nodes"/>.</returns>
     private static bool[] CreateFlags(IReadOnlyList<GridNode> nodes, int count)
     {
         var flags = new bool[count];
@@ -208,11 +297,29 @@ public sealed class GridCanvas : Control
         return flags;
     }
 
+    /// <summary>
+    /// Returns the rectangle covered by a cell.
+    /// </summary>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <param name="row">The row of the cell.</param>
+    /// <param name="column">The column of the cell.</param>
+    /// <returns>The rectangle of the cell.</returns>
     private static Rect CellRect(double offsetX, double offsetY, double cellSize, int row, int column)
     {
         return new Rect(offsetX + column * cellSize, offsetY + row * cellSize, cellSize, cellSize);
     }
 
+    /// <summary>
+    /// Returns the centre point of a cell.
+    /// </summary>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <param name="row">The row of the cell.</param>
+    /// <param name="column">The column of the cell.</param>
+    /// <returns>The centre point of the cell.</returns>
     private static Point CellCentre(double offsetX, double offsetY, double cellSize, int row, int column)
     {
         return new Point(
@@ -220,15 +327,28 @@ public sealed class GridCanvas : Control
             offsetY + (row + 0.5) * cellSize);
     }
 
+    /// <summary>
+    /// Creates a frozen brush from a colour string.
+    /// </summary>
+    /// <param name="value">The colour to create the brush from.</param>
+    /// <returns>The frozen brush.</returns>
     private static SolidColorBrush CreateBrush(string value)
     {
         var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(value));
         brush.Freeze();
         return brush;
     }
+    #endregion Private Methods
 
+    #region Events
+    /// <summary>
+    /// Repaints the canvas when the drawn state is replaced.
+    /// </summary>
+    /// <param name="d">The canvas whose state changed.</param>
+    /// <param name="e">The event arguments of the change.</param>
     private static void OnRenderStateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         ((GridCanvas)d).InvalidateVisual();
     }
+    #endregion Events
 }
