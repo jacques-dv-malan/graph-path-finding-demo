@@ -30,5 +30,16 @@ public enum LayoutStyle
     /// <summary>
     /// A tree built by walking at random from every cell until the walk reaches the maze.
     /// </summary>
-    Wilson
+    Wilson,
+
+    /// <summary>
+    /// A tree grown outwards from the whole set of cells reached so far.
+    /// </summary>
+    GrowingTree,
+
+    /// <summary>
+    /// A tree built by walking at random through the cells that are left, and hunting for a place
+    /// to carry on when the walk runs into a dead end.
+    /// </summary>
+    HuntAndKill
 }

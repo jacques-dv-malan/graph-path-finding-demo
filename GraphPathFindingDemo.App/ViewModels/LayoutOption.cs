@@ -24,6 +24,8 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.RandomizedPrim => "Randomized Prim",
             LayoutStyle.Eller => "Eller",
             LayoutStyle.Wilson => "Wilson",
+            LayoutStyle.GrowingTree => "Growing tree",
+            LayoutStyle.HuntAndKill => "Hunt-and-kill",
             _ => style.ToString()
         };
 
