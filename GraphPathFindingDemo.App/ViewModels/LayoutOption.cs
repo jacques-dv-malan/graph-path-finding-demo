@@ -29,6 +29,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.Braided => "Braided",
             LayoutStyle.SparseWalls => "Sparse walls",
             LayoutStyle.DenseWalls => "Dense walls",
+            LayoutStyle.RoomAndCorridor => "Room and corridor",
             _ => style.ToString()
         };
 

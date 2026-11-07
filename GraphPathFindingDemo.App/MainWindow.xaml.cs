@@ -32,7 +32,8 @@ public partial class MainWindow : Window
             new HuntAndKillLayoutGenerator(),
             new BraidedLayoutGenerator(),
             new WallDensityLayoutGenerator(LayoutStyle.SparseWalls, 0.5),
-            new WallDensityLayoutGenerator(LayoutStyle.DenseWalls, 0.1)
+            new WallDensityLayoutGenerator(LayoutStyle.DenseWalls, 0.1),
+            new RoomAndCorridorLayoutGenerator()
         );
 
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());

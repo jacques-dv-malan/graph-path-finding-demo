@@ -56,5 +56,10 @@ public enum LayoutStyle
     /// <summary>
     /// A maze with loops, made by knocking out few of the walls a perfect maze does not need.
     /// </summary>
-    DenseWalls
+    DenseWalls,
+
+    /// <summary>
+    /// A maze of rectangular rooms joined by doors.
+    /// </summary>
+    RoomAndCorridor
 }

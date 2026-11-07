@@ -13,14 +13,16 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
   cell, and `Edges.Count == Nodes.Count - 1` (visible in the read-outs as *Nodes* and *Edges*).
   The braided maze is the exception: it is a perfect maze with its dead ends knocked out, so it
   holds more passages than cells minus one and has loops. The sparse and dense wall mazes are
-  exceptions too: they are a perfect maze with some of its spare walls knocked out.
+  exceptions too: they are a perfect maze with some of its spare walls knocked out. The room and
+  corridor maze is a third exception: it is made of open rooms, so it holds even more
+  passages.
 - **BFS in motion** — the search is stepped one move at a time. A move colours in one cell: the
   cell the search reaches turns blue, and the neighbours it reveals turn amber. The cyan line is
   the path found at the end.
 - **Why BFS is optimal here** — in a perfect maze the shortest path is the *only* path, so BFS's
-  optimality is never confused by a tie-break between equally short routes. The braided, sparse
-  and dense wall mazes are the exceptions: they have loops, so several routes of the same length
-  may lead to the end.
+  optimality is never confused by a tie-break between equally short routes. The braided, sparse,
+  dense wall and room and corridor mazes are the exceptions: they have loops, so several routes
+  of the same length may lead to the end.
 
 ## Requirements
 
@@ -43,8 +45,8 @@ dotnet build -c Release
 
 | Control | Effect |
 | --- | --- |
-| **Layout** | The maze generator: recursive division (boxes and corridors), recursive backtracker (long corridors), randomized Prim (blobby), Eller (row by row), Wilson (evenly drawn), growing tree (bushy), hunt-and-kill (long winding passages), braided (no dead ends), sparse walls (open) or dense walls
-(narrow). Changing it rebuilds the maze and resets the search. |
+| **Layout** | The maze generator: recursive division (boxes and corridors), recursive backtracker (long corridors), randomized Prim (blobby), Eller (row by row), Wilson (evenly drawn), growing tree (bushy), hunt-and-kill (long winding passages), braided (no dead ends), sparse walls (open), dense walls (narrow) or room and corridor (open rooms joined by doors).
+Changing it rebuilds the maze and resets the search. |
 | **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator. The same seed always produces the same maze. A new run starts with the current epoch time in seconds. |
 | **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
@@ -80,7 +82,8 @@ GraphPathFindingDemo.Core/
 │  ├─ GrowingTreeLayoutGenerator.cs
 │  ├─ HuntAndKillLayoutGenerator.cs
 │  ├─ BraidedLayoutGenerator.cs
-│  └─ WallDensityLayoutGenerator.cs
+│  ├─ WallDensityLayoutGenerator.cs
+│  └─ RoomAndCorridorLayoutGenerator.cs
 ├─ Pathfinding/
 │  ├─ ISearchAlgorithm.cs
 │  ├─ SearchStep.cs
