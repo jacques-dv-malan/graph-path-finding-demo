@@ -1,0 +1,200 @@
+﻿<Window x:Class="GraphPathFindingDemo.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:GraphPathFindingDemo.App.Controls"
+        Title="Graph &amp; Path Finding Demo"
+        Height="700"
+        Width="1200"
+        MinWidth="900"
+        MinHeight="600"
+        Background="#FF20242B"
+        Foreground="#FFE8ECF2">
+    <Window.Resources>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#FF8A97A8" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style x:Key="ReadOutLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFB8C0CC" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="280" />
+        </Grid.ColumnDefinitions>
+
+        <controls:GridCanvas Grid.Column="0"
+                            Background="Transparent"
+                            RenderState="{Binding RenderState}" />
+
+        <Border Grid.Column="1"
+                Background="#FF20242B"
+                BorderBrush="#FF343A44"
+                BorderThickness="1,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Graph &amp; Path Finding"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,12" />
+
+                    <TextBlock Text="LAYOUT" Style="{StaticResource SectionHeader}" />
+                    <TextBlock Text="Recursive division" Margin="0,0,0,8" />
+
+                    <TextBlock Text="ALGORITHM" Style="{StaticResource SectionHeader}" />
+                    <TextBlock Text="Breadth-first search" Margin="0,0,0,8" />
+
+                    <TextBlock Text="ENDPOINTS" Style="{StaticResource SectionHeader}" />
+                    <TextBlock Text="Fixed (top-left → bottom-right)" Margin="0,0,0,12" />
+
+                    <TextBlock Text="GRID" Style="{StaticResource SectionHeader}" />
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Width" Style="{StaticResource ReadOutLabel}" />
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Margin="0,3"
+                                 Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Row="1" Text="Height" Style="{StaticResource ReadOutLabel}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Margin="0,3"
+                                 Text="{Binding Height, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Row="2" Text="Seed" Style="{StaticResource ReadOutLabel}" />
+                        <TextBox Grid.Row="2"
+                                 Grid.Column="1"
+                                 Margin="0,3"
+                                 Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <WrapPanel Margin="0,0,0,12">
+                        <Button Content="New Grid"
+                                Command="{Binding NewGridCommand}"
+                                Margin="0,0,6,6"
+                                Padding="12,4" />
+                        <Button Content="Play"
+                                Command="{Binding PlayCommand}"
+                                Margin="0,0,6,6"
+                                Padding="12,4" />
+                        <Button Content="Pause"
+                                Command="{Binding PauseCommand}"
+                                Margin="0,0,6,6"
+                                Padding="12,4" />
+                        <Button Content="Step"
+                                Command="{Binding StepCommand}"
+                                Margin="0,0,6,6"
+                                Padding="12,4" />
+                        <Button Content="Reset"
+                                Command="{Binding ResetCommand}"
+                                Margin="0,0,6,6"
+                                Padding="12,4" />
+                    </WrapPanel>
+
+                    <TextBlock Text="SPEED" Style="{StaticResource SectionHeader}" />
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="40" />
+                        </Grid.ColumnDefinitions>
+
+                        <Slider Minimum="1"
+                                Maximum="50"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                Value="{Binding StepsPerTick}"
+                                VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding StepsPerTick}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0" />
+                    </Grid>
+
+                    <TextBlock Text="READ-OUTS" Style="{StaticResource SectionHeader}" />
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Nodes" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding NodeCount}" />
+
+                        <TextBlock Grid.Row="1" Text="Edges" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EdgeCount}" />
+
+                        <TextBlock Grid.Row="2" Text="Visited" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding VisitedCount}" />
+
+                        <TextBlock Grid.Row="3" Text="Frontier" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding FrontierCount}" />
+
+                        <TextBlock Grid.Row="4" Text="Path length" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PathLength}" />
+
+                        <TextBlock Grid.Row="5" Text="Status" Style="{StaticResource ReadOutLabel}" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Status}" FontWeight="SemiBold" />
+                    </Grid>
+
+                    <TextBlock Text="LEGEND" Style="{StaticResource SectionHeader}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Rectangle Grid.Row="0" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.WallBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Wall" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="1" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.VisitedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Visited" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="2" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.FrontierBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Frontier (queued)" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="3" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.PathBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Path" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="4" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.StartBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Start" Margin="8,0,0,0" VerticalAlignment="Center" />
+
+                        <Rectangle Grid.Row="5" Width="20" Height="12" Fill="{x:Static controls:GridCanvas.EndBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="End" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

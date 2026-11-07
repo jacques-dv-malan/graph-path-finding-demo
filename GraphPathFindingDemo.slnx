@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GraphPathFindingDemo.App/GraphPathFindingDemo.App.csproj" />
+  <Project Path="GraphPathFindingDemo.Core/GraphPathFindingDemo.Core.csproj" />
+</Solution>
