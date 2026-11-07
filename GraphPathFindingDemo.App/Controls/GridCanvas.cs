@@ -60,6 +60,12 @@ public sealed class GridCanvas : Control
     public static readonly Brush EndBrush = CreateBrush("#FFE03B3B");
     #endregion Constants
 
+    #region Instance Fields
+    private WallLayer? _walls;
+    private bool[] _visitedFlags = [];
+    private bool[] _frontierFlags = [];
+    #endregion Instance Fields
+
     #region Properties
     /// <summary>
     /// Gets or sets the state being drawn. Replacing the value repaints the canvas.
@@ -110,6 +116,74 @@ public sealed class GridCanvas : Control
     }
     #endregion Overridden Members
 
+    #region Internal Classes
+    /// <summary>
+    /// The walls of a grid, built once and reused for as long as the grid and the size of a cell
+    /// stay the same.
+    /// </summary>
+    private sealed class WallLayer
+    {
+        #region Constructor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WallLayer"/> class.
+        /// </summary>
+        /// <param name="graph">The graph the walls belong to.</param>
+        /// <param name="geometry">The geometry of the walls.</param>
+        /// <param name="pen">The pen the walls are stroked with.</param>
+        /// <param name="cellSize">The size of a single cell.</param>
+        /// <param name="offsetX">The left edge of the grid.</param>
+        /// <param name="offsetY">The top edge of the grid.</param>
+        public WallLayer(
+            GridGraph graph,
+            StreamGeometry geometry,
+            Pen pen,
+            double cellSize,
+            double offsetX,
+            double offsetY)
+        {
+            Graph = graph;
+            Geometry = geometry;
+            Pen = pen;
+            CellSize = cellSize;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+        }
+        #endregion Constructor
+
+        #region Properties
+        /// <summary>
+        /// Gets the graph the walls belong to.
+        /// </summary>
+        public GridGraph Graph { get; }
+
+        /// <summary>
+        /// Gets the geometry of the walls.
+        /// </summary>
+        public StreamGeometry Geometry { get; }
+
+        /// <summary>
+        /// Gets the pen the walls are stroked with.
+        /// </summary>
+        public Pen Pen { get; }
+
+        /// <summary>
+        /// Gets the size of a single cell the walls were built for.
+        /// </summary>
+        public double CellSize { get; }
+
+        /// <summary>
+        /// Gets the left edge of the grid the walls were built for.
+        /// </summary>
+        public double OffsetX { get; }
+
+        /// <summary>
+        /// Gets the top edge of the grid the walls were built for.
+        /// </summary>
+        public double OffsetY { get; }
+        #endregion Properties
+    }
+    #endregion Internal Classes
+
     #region Private Methods
     /// <summary>
     /// Fills the cells that have been visited and the cells waiting on the frontier.
@@ -120,7 +194,7 @@ public sealed class GridCanvas : Control
     /// <param name="offsetX">The left edge of the grid.</param>
     /// <param name="offsetY">The top edge of the grid.</param>
     /// <param name="cellSize">The size of a single cell.</param>
-    private static void DrawCells(
+    private void DrawCells(
         DrawingContext dc,
         RenderState state,
         GridGraph graph,
@@ -128,8 +202,11 @@ public sealed class GridCanvas : Control
         double offsetY,
         double cellSize)
     {
-        var visited = CreateFlags(state.Visited, graph.Nodes.Count);
-        var frontier = CreateFlags(state.Discovered, graph.Nodes.Count);
+        var visited = CreateFlags(_visitedFlags, state.Visited, graph.Nodes.Count);
+        var frontier = CreateFlags(_frontierFlags, state.Discovered, graph.Nodes.Count);
+
+        _visitedFlags = visited;
+        _frontierFlags = frontier;
 
         for (var row = 0; row < graph.Height; row++)
         {
@@ -158,53 +235,142 @@ public sealed class GridCanvas : Control
     /// <param name="offsetX">The left edge of the grid.</param>
     /// <param name="offsetY">The top edge of the grid.</param>
     /// <param name="cellSize">The size of a single cell.</param>
-    private static void DrawWalls(
+    private void DrawWalls(
         DrawingContext dc,
         GridGraph graph,
         double offsetX,
         double offsetY,
         double cellSize)
     {
-        var pen = new Pen(WallBrush, Math.Max(1.0, cellSize * 0.08));
-        pen.Freeze();
+        var walls = GetWalls(graph, offsetX, offsetY, cellSize);
 
-        for (var row = 0; row < graph.Height; row++)
+        dc.DrawGeometry(null, walls.Pen, walls.Geometry);
+    }
+
+    /// <summary>
+    /// Returns the cached wall layer, building it when the grid or the size of a cell changed.
+    /// </summary>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The wall layer to draw.</returns>
+    private WallLayer GetWalls(GridGraph graph, double offsetX, double offsetY, double cellSize)
+    {
+        var cached = _walls;
+
+        if (cached is not null
+            && ReferenceEquals(cached.Graph, graph)
+            && cached.CellSize == cellSize
+            && cached.OffsetX == offsetX
+            && cached.OffsetY == offsetY)
         {
-            for (var column = 0; column < graph.Width; column++)
+            return cached;
+        }
+
+        var layer = new WallLayer(
+            graph,
+            BuildWallGeometry(graph, offsetX, offsetY, cellSize),
+            BuildWallPen(cellSize),
+            cellSize,
+            offsetX,
+            offsetY);
+
+        _walls = layer;
+        return layer;
+    }
+
+    /// <summary>
+    /// Builds the geometry of every wall of the grid.
+    /// </summary>
+    /// <param name="graph">The graph being drawn.</param>
+    /// <param name="offsetX">The left edge of the grid.</param>
+    /// <param name="offsetY">The top edge of the grid.</param>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The frozen geometry of the walls.</returns>
+    private static StreamGeometry BuildWallGeometry(
+        GridGraph graph,
+        double offsetX,
+        double offsetY,
+        double cellSize)
+    {
+        var nodeCount = graph.Nodes.Count;
+        var passages = new HashSet<int>();
+
+        foreach (var edge in graph.Edges)
+        {
+            var from = Math.Min(edge.From.Index, edge.To.Index);
+            var to = Math.Max(edge.From.Index, edge.To.Index);
+
+            passages.Add((from * nodeCount) + to);
+        }
+
+        var geometry = new StreamGeometry();
+
+        using (var context = geometry.Open())
+        {
+            for (var row = 0; row < graph.Height; row++)
             {
-                var cell = graph.NodeAt(new GridPoint(row, column));
-                var left = offsetX + column * cellSize;
-                var top = offsetY + row * cellSize;
-                var right = left + cellSize;
-                var bottom = top + cellSize;
-
-                if (row == 0)
+                for (var column = 0; column < graph.Width; column++)
                 {
-                    dc.DrawLine(pen, new Point(left, top), new Point(right, top));
-                }
+                    var index = (row * graph.Width) + column;
+                    var left = offsetX + (column * cellSize);
+                    var top = offsetY + (row * cellSize);
+                    var right = left + cellSize;
+                    var bottom = top + cellSize;
 
-                if (column == 0)
-                {
-                    dc.DrawLine(pen, new Point(left, top), new Point(left, bottom));
-                }
+                    if (row == 0)
+                    {
+                        DrawWall(context, left, top, right, top);
+                    }
 
-                var hasRightPassage = column + 1 < graph.Width
-                    && graph.IsConnected(cell, graph.NodeAt(new GridPoint(row, column + 1)));
+                    if (column == 0)
+                    {
+                        DrawWall(context, left, top, left, bottom);
+                    }
 
-                if (!hasRightPassage)
-                {
-                    dc.DrawLine(pen, new Point(right, top), new Point(right, bottom));
-                }
+                    if (column + 1 < graph.Width && !passages.Contains((index * nodeCount) + index + 1))
+                    {
+                        DrawWall(context, right, top, right, bottom);
+                    }
 
-                var hasBottomPassage = row + 1 < graph.Height
-                    && graph.IsConnected(cell, graph.NodeAt(new GridPoint(row + 1, column)));
-
-                if (!hasBottomPassage)
-                {
-                    dc.DrawLine(pen, new Point(left, bottom), new Point(right, bottom));
+                    if (row + 1 < graph.Height && !passages.Contains((index * nodeCount) + index + graph.Width))
+                    {
+                        DrawWall(context, left, bottom, right, bottom);
+                    }
                 }
             }
         }
+
+        geometry.Freeze();
+        return geometry;
+    }
+
+    /// <summary>
+    /// Adds a single wall to the geometry being built.
+    /// </summary>
+    /// <param name="context">The context of the geometry being built.</param>
+    /// <param name="x1">The horizontal position of the start of the wall.</param>
+    /// <param name="y1">The vertical position of the start of the wall.</param>
+    /// <param name="x2">The horizontal position of the end of the wall.</param>
+    /// <param name="y2">The vertical position of the end of the wall.</param>
+    private static void DrawWall(StreamGeometryContext context, double x1, double y1, double x2, double y2)
+    {
+        context.BeginFigure(new Point(x1, y1), isFilled: false, isClosed: false);
+        context.LineTo(new Point(x2, y2), isStroked: true, isSmoothJoin: false);
+    }
+
+    /// <summary>
+    /// Creates the pen the walls are stroked with.
+    /// </summary>
+    /// <param name="cellSize">The size of a single cell.</param>
+    /// <returns>The frozen pen.</returns>
+    private static Pen BuildWallPen(double cellSize)
+    {
+        var pen = new Pen(WallBrush, Math.Max(1.0, cellSize * 0.08));
+        pen.Freeze();
+
+        return pen;
     }
 
     /// <summary>
@@ -285,9 +451,16 @@ public sealed class GridCanvas : Control
     /// <param name="nodes">The nodes to index.</param>
     /// <param name="count">The number of nodes in the graph.</param>
     /// <returns>A flag per node index, set for every node in <paramref name="nodes"/>.</returns>
-    private static bool[] CreateFlags(IReadOnlyList<GridNode> nodes, int count)
+    private static bool[] CreateFlags(bool[] flags, IReadOnlyList<GridNode> nodes, int count)
     {
-        var flags = new bool[count];
+        if (flags.Length != count)
+        {
+            flags = new bool[count];
+        }
+        else
+        {
+            Array.Clear(flags, 0, count);
+        }
 
         foreach (var node in nodes)
         {

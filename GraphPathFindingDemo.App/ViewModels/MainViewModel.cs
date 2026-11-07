@@ -3,7 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using GraphPathFindingDemo.Core.Factories;
 using GraphPathFindingDemo.Core.Graph;
 using GraphPathFindingDemo.Core.Pathfinding;
-using System.Windows.Threading;
+using System.Diagnostics;
+using System.Windows.Media;
 
 namespace GraphPathFindingDemo.App.ViewModels;
 
@@ -34,24 +35,19 @@ public partial class MainViewModel : ObservableObject
     public const int DefaultSeed = 0;
 
     /// <summary>
-    /// The number of search events per tick a new run starts at.
+    /// The number of milliseconds between two moves a new run starts at.
     /// </summary>
-    public const int DefaultStepsPerTick = 10;
+    public const int DefaultStepIntervalMilliseconds = 50;
 
     /// <summary>
-    /// The smallest number of search events per tick.
+    /// The smallest number of milliseconds between two moves.
     /// </summary>
-    public const int MinStepsPerTick = 1;
+    public const int MinStepIntervalMilliseconds = 50;
 
     /// <summary>
-    /// The largest number of search events per tick.
+    /// The largest number of milliseconds between two moves.
     /// </summary>
-    public const int MaxStepsPerTick = 50;
-
-    /// <summary>
-    /// The interval between two ticks of the playback timer, in milliseconds.
-    /// </summary>
-    public const int TimerIntervalMilliseconds = 40;
+    public const int MaxStepIntervalMilliseconds = 1000;
 
     /// <summary>
     /// The status shown while no search is running.
@@ -77,7 +73,6 @@ public partial class MainViewModel : ObservableObject
     #region Instance Fields
     private readonly IGridFactory _factory;
     private readonly ISearchAlgorithm _algorithm;
-    private readonly DispatcherTimer _timer;
 
     private readonly List<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
@@ -85,6 +80,11 @@ public partial class MainViewModel : ObservableObject
 
     private GridScenario _scenario = null!;
     private IEnumerator<SearchStep>? _search;
+    private SearchStep? _lookahead;
+    private GridNode? _visitedLeaf;
+
+    private long _lastMoveTimestamp;
+    private bool _isRunning;
     #endregion Instance Fields
 
     #region Properties
@@ -109,11 +109,11 @@ public partial class MainViewModel : ObservableObject
     private int _seed = DefaultSeed;
 
     /// <summary>
-    /// Gets or sets the number of search events the timer applies per tick. Values outside the
-    /// supported range are clamped.
+    /// Gets or sets the number of milliseconds between two moves. Values outside the supported
+    /// range are clamped.
     /// </summary>
     [ObservableProperty]
-    private int _stepsPerTick = DefaultStepsPerTick;
+    private int _stepIntervalMilliseconds = DefaultStepIntervalMilliseconds;
 
     /// <summary>
     /// Gets the snapshot the canvas draws. A new instance is published on every update.
@@ -189,8 +189,7 @@ public partial class MainViewModel : ObservableObject
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         _algorithm = algorithm ?? throw new ArgumentNullException(nameof(algorithm));
 
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(TimerIntervalMilliseconds) };
-        _timer.Tick += OnTimerTick;
+        CompositionTarget.Rendering += OnRendering;
 
         RebuildScenario();
     }
@@ -198,11 +197,11 @@ public partial class MainViewModel : ObservableObject
 
     #region Public Methods
     /// <summary>
-    /// Stops the playback timer. Called when the window closes.
+    /// Stops the animation. Called when the window closes.
     /// </summary>
     public void Stop()
     {
-        _timer.Stop();
+        CompositionTarget.Rendering -= OnRendering;
     }
     #endregion Public Methods
 
@@ -251,12 +250,18 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Clamps the number of search events per tick when it changes.
+    /// Clamps the number of milliseconds between two moves when it changes. The running animation
+    /// reads the interval as it goes, so a change takes effect at once.
     /// </summary>
-    /// <param name="value">The requested number of events per tick.</param>
-    partial void OnStepsPerTickChanged(int value)
+    /// <param name="value">The requested number of milliseconds between two moves.</param>
+    partial void OnStepIntervalMillisecondsChanged(int value)
     {
-        StepsPerTick = Math.Clamp(value, MinStepsPerTick, MaxStepsPerTick);
+        var clamped = Math.Clamp(value, MinStepIntervalMilliseconds, MaxStepIntervalMilliseconds);
+
+        if (clamped != value)
+        {
+            StepIntervalMilliseconds = clamped;
+        }
     }
 
     /// <summary>
@@ -269,7 +274,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Starts the playback timer.
+    /// Starts the animation.
     /// </summary>
     [RelayCommand]
     private void Play()
@@ -279,29 +284,33 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        _isRunning = true;
+        _lastMoveTimestamp = Stopwatch.GetTimestamp();
+
+        PublishRenderState();
+
         Status = StatusRunning;
-        _timer.Start();
         UpdateCommandStates();
     }
 
     /// <summary>
-    /// Stops the playback timer, leaving the search where it is.
+    /// Stops the animation, leaving the search where it is.
     /// </summary>
     [RelayCommand]
     private void Pause()
     {
-        if (!_timer.IsEnabled)
+        if (!_isRunning)
         {
             return;
         }
 
-        _timer.Stop();
+        _isRunning = false;
         Status = StatusIdle;
         UpdateCommandStates();
     }
 
     /// <summary>
-    /// Advances the search by exactly one event.
+    /// Advances the search by exactly one move.
     /// </summary>
     [RelayCommand]
     private void Step()
@@ -311,9 +320,11 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        _timer.Stop();
+        _isRunning = false;
         Status = StatusIdle;
-        Advance(1);
+
+        Advance();
+        UpdateCommandStates();
     }
 
     /// <summary>
@@ -341,12 +352,13 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     private void ResetSearch()
     {
-        _timer.Stop();
+        _isRunning = false;
         DisposeSearch();
 
         _discovered.Clear();
         _visited.Clear();
         _path.Clear();
+        _visitedLeaf = null;
 
         _search = _algorithm.Search(_scenario.Graph, _scenario.Start, _scenario.End).GetEnumerator();
 
@@ -360,48 +372,103 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Applies up to the given number of search events and publishes the new state.
+    /// Applies the next move of the search and publishes the new state.
     /// </summary>
-    /// <param name="stepCount">The maximum number of events to apply.</param>
-    private void Advance(int stepCount)
+    /// <remarks>
+    /// A move ends just before the next visit, so a visit and the neighbours it reveals share one
+    /// interval. The start cell belongs to the first move, and a visit that reveals no neighbour
+    /// stands alone.
+    /// </remarks>
+    private void Advance()
     {
         if (_search is null)
         {
             return;
         }
 
-        var finished = false;
-        var pathFound = false;
+        var visitedInMove = false;
 
-        for (var i = 0; i < stepCount; i++)
+        while (true)
         {
-            if (!_search.MoveNext())
+            if (!TryTakeStep(out var step))
             {
-                finished = true;
-                break;
+                PublishRenderState();
+                Complete(pathFound: false);
+                return;
             }
 
-            var step = _search.Current;
             ApplyStep(step);
 
             if (step.Kind == SearchStepKind.PathFound)
             {
-                finished = true;
-                pathFound = true;
+                PublishRenderState();
+                Complete(pathFound: true);
+                return;
+            }
+
+            if (step.Kind == SearchStepKind.Visited)
+            {
+                visitedInMove = true;
+            }
+
+            var hasNext = TryPeekStep(out var next);
+            var nextIsVisit = !hasNext || next.Kind == SearchStepKind.Visited;
+
+            // A dead end has no neighbour to hand the highlight on, so it is released at once.
+            if (step.Kind == SearchStepKind.Visited && nextIsVisit && _visitedLeaf is not null)
+            {
+                _discovered.Remove(_visitedLeaf);
+                _visitedLeaf = null;
+            }
+
+            // The move runs up to the next visit. The first move stays open until the start cell
+            // has been visited.
+            if (nextIsVisit && visitedInMove)
+            {
                 break;
             }
         }
 
         PublishRenderState();
+        UpdateCounters();
+    }
 
-        if (finished)
+    /// <summary>
+    /// Looks at the next step of the search without consuming it.
+    /// </summary>
+    /// <param name="step">The step that comes next.</param>
+    /// <returns><see langword="true"/> when a step is available.</returns>
+    private bool TryPeekStep(out SearchStep step)
+    {
+        if (_lookahead is null)
         {
-            Complete(pathFound);
+            if (_search is null || !_search.MoveNext())
+            {
+                step = default;
+                return false;
+            }
+
+            _lookahead = _search.Current;
         }
-        else
+
+        step = _lookahead.Value;
+        return true;
+    }
+
+    /// <summary>
+    /// Takes the next step of the search, consuming it.
+    /// </summary>
+    /// <param name="step">The step that was taken.</param>
+    /// <returns><see langword="true"/> when a step was available.</returns>
+    private bool TryTakeStep(out SearchStep step)
+    {
+        if (!TryPeekStep(out step))
         {
-            UpdateCounters();
+            return false;
         }
+
+        _lookahead = null;
+        return true;
     }
 
     /// <summary>
@@ -413,12 +480,26 @@ public partial class MainViewModel : ObservableObject
         switch (step.Kind)
         {
             case SearchStepKind.Discovered:
+                // The previously visited leaf stays highlighted until its replacement is found.
+                if (_visitedLeaf is not null)
+                {
+                    _discovered.Remove(_visitedLeaf);
+                    _visitedLeaf = null;
+                }
+
                 _discovered.Add(step.Node);
                 break;
 
             case SearchStepKind.Visited:
+                // The cell this one replaces is released. This one stays highlighted until one of
+                // its neighbours is discovered, or until the move finds it to be a dead end.
+                if (_visitedLeaf is not null)
+                {
+                    _discovered.Remove(_visitedLeaf);
+                }
+
                 _visited.Add(step.Node);
-                _discovered.Remove(step.Node);
+                _visitedLeaf = step.Node;
                 break;
 
             case SearchStepKind.PathFound:
@@ -439,7 +520,7 @@ public partial class MainViewModel : ObservableObject
     /// <param name="pathFound">Whether the search found a path.</param>
     private void Complete(bool pathFound)
     {
-        _timer.Stop();
+        _isRunning = false;
         DisposeSearch();
 
         Status = pathFound ? StatusDone : StatusNoPath;
@@ -454,6 +535,7 @@ public partial class MainViewModel : ObservableObject
     {
         (_search as IDisposable)?.Dispose();
         _search = null;
+        _lookahead = null;
     }
 
     /// <summary>
@@ -467,15 +549,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Publishes the current state to the canvas.
+    /// Publishes the current state to the canvas. The collections are handed over as they are,
+    /// so that a move does not copy them.
     /// </summary>
     private void PublishRenderState()
     {
-        RenderState = new RenderState(
-            _scenario,
-            _discovered.ToArray(),
-            _visited.ToArray(),
-            _path.ToArray());
+        RenderState = new RenderState(_scenario, _discovered, _visited, _path);
     }
 
     /// <summary>
@@ -484,23 +563,44 @@ public partial class MainViewModel : ObservableObject
     private void UpdateCommandStates()
     {
         var hasSearch = _search is not null;
-        var isRunning = _timer.IsEnabled;
 
-        CanPlay = hasSearch && !isRunning;
-        CanPause = isRunning;
-        CanStep = hasSearch && !isRunning;
+        CanPlay = hasSearch && !_isRunning;
+        CanPause = _isRunning;
+        CanStep = hasSearch && !_isRunning;
     }
+
     #endregion Private Methods
 
     #region Events
     /// <summary>
-    /// Handles a tick of the playback timer by applying the next batch of search events.
+    /// Handles a frame of the display by applying the move that is due.
     /// </summary>
-    /// <param name="sender">The timer raising the tick.</param>
-    /// <param name="e">The event arguments of the tick.</param>
-    private void OnTimerTick(object? sender, EventArgs e)
+    /// <remarks>
+    /// A move is applied once <see cref="StepIntervalMilliseconds"/> have elapsed since the
+    /// previous one, measured on the high-resolution clock. A move is applied whole, so the delay
+    /// falls between moves and never between the events of a move.
+    /// </remarks>
+    /// <param name="sender">The composition target raising the event.</param>
+    /// <param name="e">The event arguments of the frame.</param>
+    private void OnRendering(object? sender, EventArgs e)
     {
-        Advance(StepsPerTick);
+        if (!_isRunning)
+        {
+            return;
+        }
+
+        // Republishing every frame keeps the rendering loop ticking between moves.
+        PublishRenderState();
+
+        var timestamp = Stopwatch.GetTimestamp();
+
+        if (Stopwatch.GetElapsedTime(_lastMoveTimestamp, timestamp).TotalMilliseconds < StepIntervalMilliseconds)
+        {
+            return;
+        }
+
+        _lastMoveTimestamp = timestamp;
+        Advance();
     }
     #endregion Events
 }

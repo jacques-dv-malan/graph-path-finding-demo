@@ -7,15 +7,52 @@ namespace GraphPathFindingDemo.App.ViewModels;
 /// The snapshot of a running search that the canvas draws.
 /// </summary>
 /// <remarks>
-/// The record is replaced rather than mutated on every update, so that the canvas sees a new
-/// value and repaints.
+/// A new instance is published on every update, so that the canvas sees a new value and
+/// repaints. The node collections are the live collections of the view model: they are read
+/// while the canvas draws, so they are never copied.
 /// </remarks>
-/// <param name="Scenario">The scenario being searched.</param>
-/// <param name="Discovered">The nodes on the frontier, reached but not yet expanded.</param>
-/// <param name="Visited">The nodes that have been expanded.</param>
-/// <param name="Path">The path found so far. Empty until the search succeeds.</param>
-public sealed record RenderState(
-    GridScenario Scenario,
-    IReadOnlyList<GridNode> Discovered,
-    IReadOnlyList<GridNode> Visited,
-    IReadOnlyList<GridNode> Path);
+public sealed class RenderState
+{
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderState"/> class.
+    /// </summary>
+    /// <param name="scenario">The scenario being searched.</param>
+    /// <param name="discovered">The nodes on the frontier, reached but not yet expanded.</param>
+    /// <param name="visited">The nodes that have been expanded.</param>
+    /// <param name="path">The path found so far. Empty until the search succeeds.</param>
+    public RenderState(
+        GridScenario scenario,
+        IReadOnlyList<GridNode> discovered,
+        IReadOnlyList<GridNode> visited,
+        IReadOnlyList<GridNode> path)
+    {
+        Scenario = scenario;
+        Discovered = discovered;
+        Visited = visited;
+        Path = path;
+    }
+    #endregion Constructor
+
+    #region Properties
+    /// <summary>
+    /// Gets the scenario being searched.
+    /// </summary>
+    public GridScenario Scenario { get; }
+
+    /// <summary>
+    /// Gets the nodes on the frontier, reached but not yet expanded.
+    /// </summary>
+    public IReadOnlyList<GridNode> Discovered { get; }
+
+    /// <summary>
+    /// Gets the nodes that have been expanded.
+    /// </summary>
+    public IReadOnlyList<GridNode> Visited { get; }
+
+    /// <summary>
+    /// Gets the path found so far. Empty until the search succeeds.
+    /// </summary>
+    public IReadOnlyList<GridNode> Path { get; }
+    #endregion Properties
+}
