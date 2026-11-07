@@ -44,7 +44,12 @@
                                Margin="0,0,0,12" />
 
                     <TextBlock Text="LAYOUT" Style="{StaticResource SectionHeader}" />
-                    <TextBlock Text="Recursive division" Margin="0,0,0,8" />
+                    <ComboBox ItemsSource="{Binding LayoutOptions}"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Style"
+                              SelectedValue="{Binding SelectedLayout}"
+                              IsEnabled="{Binding CanEditGrid}"
+                              Margin="0,0,0,12" />
 
                     <TextBlock Text="ALGORITHM" Style="{StaticResource SectionHeader}" />
                     <TextBlock Text="Breadth-first search" Margin="0,0,0,8" />

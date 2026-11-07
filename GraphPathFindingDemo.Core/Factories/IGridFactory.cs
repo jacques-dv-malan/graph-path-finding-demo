@@ -1,4 +1,5 @@
 using GraphPathFindingDemo.Core.Endpoints;
+using GraphPathFindingDemo.Core.Layout;
 
 namespace GraphPathFindingDemo.Core.Factories;
 
@@ -8,12 +9,23 @@ namespace GraphPathFindingDemo.Core.Factories;
 public interface IGridFactory
 {
     /// <summary>
+    /// Gets the layout styles the factory can build.
+    /// </summary>
+    IReadOnlyList<LayoutStyle> AvailableStyles { get; }
+
+    /// <summary>
     /// Creates a scenario for the requested grid.
     /// </summary>
     /// <param name="width">The number of columns to generate.</param>
     /// <param name="height">The number of rows to generate.</param>
     /// <param name="seed">The seed controlling the generated layout.</param>
+    /// <param name="style">The style of the layout to generate.</param>
     /// <param name="endpointMode">The mode deciding how the endpoints are chosen.</param>
     /// <returns>The created scenario.</returns>
-    GridScenario Create(int width, int height, int seed, EndpointMode endpointMode = EndpointMode.FixedFixed);
+    GridScenario Create(
+        int width,
+        int height,
+        int seed,
+        LayoutStyle style = LayoutStyle.RecursiveDivision,
+        EndpointMode endpointMode = EndpointMode.FixedFixed);
 }

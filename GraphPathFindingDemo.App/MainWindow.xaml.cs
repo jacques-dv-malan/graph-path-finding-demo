@@ -22,7 +22,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var factory = new GridFactory(new RecursiveDivisionLayoutGenerator());
+        var factory = new GridFactory(
+            new RecursiveDivisionLayoutGenerator(),
+            new RecursiveBacktrackerLayoutGenerator()
+        );
+
         var viewModel = new MainViewModel(factory, new BreadthFirstSearch());
 
         DataContext = viewModel;

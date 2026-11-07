@@ -8,6 +8,11 @@ namespace GraphPathFindingDemo.Core.Layout;
 public interface ILayoutGenerator
 {
     /// <summary>
+    /// Gets the style of the layout this generator produces.
+    /// </summary>
+    LayoutStyle Style { get; }
+
+    /// <summary>
     /// Generates a graph for the requested grid.
     /// </summary>
     /// <param name="width">The number of columns to generate.</param>

@@ -12,6 +12,13 @@ namespace GraphPathFindingDemo.Core.Layout;
 /// </remarks>
 public sealed class RecursiveDivisionLayoutGenerator : ILayoutGenerator
 {
+    #region Properties
+    /// <summary>
+    /// Gets the style of the layout this generator produces.
+    /// </summary>
+    public LayoutStyle Style => LayoutStyle.RecursiveDivision;
+    #endregion Properties
+
     #region Public Methods
     /// <summary>
     /// Generates a maze for the requested grid.

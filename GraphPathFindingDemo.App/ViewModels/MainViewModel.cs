@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GraphPathFindingDemo.Core.Factories;
 using GraphPathFindingDemo.Core.Graph;
+using GraphPathFindingDemo.Core.Layout;
 using GraphPathFindingDemo.Core.Pathfinding;
 using System.Diagnostics;
 using System.Windows.Media;
@@ -72,6 +73,7 @@ public partial class MainViewModel : ObservableObject
     private readonly List<GridNode> _discovered = [];
     private readonly List<GridNode> _visited = [];
     private readonly List<GridNode> _path = [];
+    private readonly List<LayoutOption> _layoutOptions = [];
 
     private GridScenario _scenario = null!;
     private IEnumerator<SearchStep>? _search;
@@ -102,6 +104,17 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private int _seed = CurrentEpochSeconds();
+
+    /// <summary>
+    /// Gets or sets the style of the layout. Any change rebuilds the scenario.
+    /// </summary>
+    [ObservableProperty]
+    private LayoutStyle _selectedLayout = LayoutStyle.RecursiveDivision;
+
+    /// <summary>
+    /// Gets the layouts the user can pick from.
+    /// </summary>
+    public IReadOnlyList<LayoutOption> LayoutOptions => _layoutOptions;
 
     /// <summary>
     /// Gets or sets the number of milliseconds between two moves. Values outside the supported
@@ -191,6 +204,11 @@ public partial class MainViewModel : ObservableObject
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         _algorithm = algorithm ?? throw new ArgumentNullException(nameof(algorithm));
 
+        foreach (var style in _factory.AvailableStyles)
+        {
+            _layoutOptions.Add(LayoutOption.For(style));
+        }
+
         CompositionTarget.Rendering += OnRendering;
 
         RebuildScenario();
@@ -247,6 +265,15 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     /// <param name="value">The requested seed.</param>
     partial void OnSeedChanged(int value)
+    {
+        RebuildScenario();
+    }
+
+    /// <summary>
+    /// Rebuilds the scenario when the layout changes.
+    /// </summary>
+    /// <param name="value">The requested layout.</param>
+    partial void OnSelectedLayoutChanged(LayoutStyle value)
     {
         RebuildScenario();
     }
@@ -353,7 +380,7 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     private void RebuildScenario()
     {
-        _scenario = _factory.Create(Width, Height, Seed);
+        _scenario = _factory.Create(Width, Height, Seed, SelectedLayout);
         NodeCount = _scenario.Graph.Nodes.Count;
         EdgeCount = _scenario.Graph.Edges.Count;
         ResetSearch();
