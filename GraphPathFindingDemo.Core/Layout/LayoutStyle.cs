@@ -66,5 +66,10 @@ public enum LayoutStyle
     /// <summary>
     /// A maze of caves, made by letting a cellular automaton settle the walls.
     /// </summary>
-    CellularAutomataCaves
+    CellularAutomataCaves,
+
+    /// <summary>
+    /// A grid of separate groves, each of them a maze of its own.
+    /// </summary>
+    Forest
 }

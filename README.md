@@ -16,14 +16,17 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
   exceptions too: they are a perfect maze with some of its spare walls knocked out. The room and
   corridor maze is a third exception: it is made of open rooms, so it holds even more
   passages. The cave maze is a fourth: it is made of open caves with rock between them, so it
-  holds passages between the caves while the rock cells carry none at all.
+  holds passages between the caves while the rock cells carry none at all. The forest maze is
+  the fifth: it holds several groves that never touch, so a search from one end of the grid to
+  the other ends without a path.
 - **BFS in motion** — the search is stepped one move at a time. A move colours in one cell: the
   cell the search reaches turns blue, and the neighbours it reveals turn amber. The cyan line is
   the path found at the end.
 - **Why BFS is optimal here** — in a perfect maze the shortest path is the *only* path, so BFS's
   optimality is never confused by a tie-break between equally short routes. The braided, sparse,
   dense wall, room and corridor and cave mazes are the exceptions: they have loops, so several
-  routes of the same length may lead to the end.
+  routes of the same length may lead to the end. The forest maze goes further: it has no path
+  at all, and the status reads `no path`.
 
 ## Requirements
 
@@ -47,8 +50,8 @@ dotnet build -c Release
 | Control | Effect |
 | --- | --- |
 | **Layout** | The maze generator: recursive division (boxes and corridors), recursive backtracker (long corridors), randomized Prim (blobby), Eller (row by row), Wilson (evenly drawn), growing tree (bushy), hunt-and-kill (long winding passages), braided (no dead ends), sparse walls (open), dense walls (narrow), room and corridor (open rooms joined by doors) or
-cellular automata caves (organic caves with rock between them). Changing it rebuilds the maze
-and resets the search. |
+cellular automata caves (organic caves with rock between them) or forest (separate groves, no
+path between them). Changing it rebuilds the maze and resets the search. |
 | **Width** / **Height** | Grid size, 5–60 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator. The same seed always produces the same maze. A new run starts with the current epoch time in seconds. |
 | **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
@@ -86,7 +89,8 @@ GraphPathFindingDemo.Core/
 │  ├─ BraidedLayoutGenerator.cs
 │  ├─ WallDensityLayoutGenerator.cs
 │  ├─ RoomAndCorridorLayoutGenerator.cs
-│  └─ CellularAutomataLayoutGenerator.cs
+│  ├─ CellularAutomataLayoutGenerator.cs
+│  └─ ForestLayoutGenerator.cs
 ├─ Pathfinding/
 │  ├─ ISearchAlgorithm.cs
 │  ├─ SearchStep.cs
