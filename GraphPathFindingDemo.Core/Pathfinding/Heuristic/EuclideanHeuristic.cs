@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Pathfinding;
+namespace GraphPathFindingDemo.Core.Pathfinding.Heuristic;
 
 /// <summary>
 /// Estimates the cost of a walk from the straight line between two cells.

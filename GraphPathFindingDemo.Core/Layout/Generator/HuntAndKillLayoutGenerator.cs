@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Layout;
+namespace GraphPathFindingDemo.Core.Layout.Generator;
 
 /// <summary>
 /// Generates a maze by walking at random through the cells that have not been reached yet, and

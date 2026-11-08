@@ -2,7 +2,9 @@ using GraphPathFindingDemo.App.Controls;
 using GraphPathFindingDemo.App.ViewModels;
 using GraphPathFindingDemo.Core.Factories;
 using GraphPathFindingDemo.Core.Layout;
-using GraphPathFindingDemo.Core.Pathfinding;
+using GraphPathFindingDemo.Core.Layout.Generator;
+using GraphPathFindingDemo.Core.Pathfinding.Heuristic;
+using GraphPathFindingDemo.Core.Pathfinding.Search;
 using System.ComponentModel;
 using System.Windows;
 

@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Layout;
+namespace GraphPathFindingDemo.Core.Layout.Generator;
 
 /// <summary>
 /// Generates a maze of caves by letting a cellular automaton settle the walls.

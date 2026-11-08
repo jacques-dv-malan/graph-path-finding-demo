@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:GraphPathFindingDemo.App.Controls"
         Title="Graph &amp; Path Finding Demo"
-        Height="700"
-        Width="1200"
+        Height="900"
+        Width="1400"
         MinWidth="900"
         MinHeight="600"
         Background="#FF20242B"
@@ -30,9 +30,9 @@
         </Grid.ColumnDefinitions>
 
         <controls:GridCanvas x:Name="GridCanvas"
-                            Grid.Column="0"
-                            Background="Transparent"
-                            RenderState="{Binding RenderState}" />
+                             Grid.Column="0"
+                             Background="Transparent"
+                             RenderState="{Binding RenderState}" />
 
         <Border Grid.Column="1"
                 Background="#FF20242B"

@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Layout;
+namespace GraphPathFindingDemo.Core.Layout.Generator;
 
 /// <summary>
 /// Generates a maze of separate groves, each of them a maze of its own.

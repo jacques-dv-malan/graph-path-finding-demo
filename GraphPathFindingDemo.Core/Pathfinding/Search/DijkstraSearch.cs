@@ -1,9 +1,9 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Pathfinding;
+namespace GraphPathFindingDemo.Core.Pathfinding.Search;
 
 /// <summary>
-/// Searches a graph for the cheapest path using Dijkstra's algorithm.
+/// Searches a graph for the cheapest path using DijkstraSearch's algorithm.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -20,7 +20,7 @@ public sealed class DijkstraSearch : ISearchAlgorithm
 {
     #region Properties
     /// <inheritdoc />
-    public SearchAlgorithmStyle Style => SearchAlgorithmStyle.Dijkstra;
+    public SearchAlgorithmStyle Style => SearchAlgorithmStyle.DijkstraSearch;
     #endregion Properties
 
     #region Public Methods

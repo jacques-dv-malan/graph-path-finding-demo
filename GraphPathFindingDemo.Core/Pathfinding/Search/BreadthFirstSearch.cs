@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Pathfinding;
+namespace GraphPathFindingDemo.Core.Pathfinding.Search;
 
 /// <summary>
 /// Searches a graph for a shortest path using breadth-first search.

@@ -1,6 +1,6 @@
 using GraphPathFindingDemo.Core.Graph;
 
-namespace GraphPathFindingDemo.Core.Pathfinding;
+namespace GraphPathFindingDemo.Core.Pathfinding.Search;
 
 /// <summary>
 /// Searches a graph for the cheapest path using the A* algorithm.
@@ -26,7 +26,7 @@ public sealed class AStarSearch : ISearchAlgorithm, IHeuristicSearch
 
     #region Properties
     /// <inheritdoc />
-    public SearchAlgorithmStyle Style => SearchAlgorithmStyle.AStar;
+    public SearchAlgorithmStyle Style => SearchAlgorithmStyle.AStarSearch;
 
     /// <inheritdoc />
     public IReadOnlyList<IHeuristic> Heuristics => _heuristics;

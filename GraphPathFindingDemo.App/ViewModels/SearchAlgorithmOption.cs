@@ -21,8 +21,8 @@ public sealed record SearchAlgorithmOption(SearchAlgorithmStyle Style, string Na
         {
             SearchAlgorithmStyle.BreadthFirstSearch => "Breadth-first search",
             SearchAlgorithmStyle.DepthFirstSearch => "Depth-first search",
-            SearchAlgorithmStyle.Dijkstra => "Dijkstra",
-            SearchAlgorithmStyle.AStar => "A* Search",
+            SearchAlgorithmStyle.DijkstraSearch => "Dijkstra search",
+            SearchAlgorithmStyle.AStarSearch => "A* search",
             _ => style.ToString()
         };
 
