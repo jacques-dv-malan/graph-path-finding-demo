@@ -92,10 +92,14 @@ public sealed class GridFactory : IGridFactory
                 "No layout generator is registered for this style.");
         }
 
-        var graph = layout.Generate(width, height, seed);
+        // The ground the maze stands on decides what a passage costs, so the terrain is built
+        // before the maze in case a layout takes those costs into account.
+        var heights = HeightField.Generate(width, height, seed);
+        var graph = layout is IHeightAwareLayoutGenerator heightAware
+            ? heightAware.Generate(width, height, seed, heights)
+            : layout.Generate(width, height, seed);
 
-        // The ground the maze stands on decides what a passage costs.
-        graph.ApplyHeights(HeightField.Generate(width, height, seed));
+        graph.ApplyHeights(heights);
 
         var (start, end) = EndpointSelector.Select(graph);
 

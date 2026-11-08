@@ -71,5 +71,10 @@ public enum LayoutStyle
     /// <summary>
     /// A grid of separate groves, each of them a maze of its own.
     /// </summary>
-    Forest
+    Forest,
+
+    /// <summary>
+    /// A perfect maze built by Kruskal's algorithm, taking the cheapest passages first.
+    /// </summary>
+    WeightedKruskal
 }

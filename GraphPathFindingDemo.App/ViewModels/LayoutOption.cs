@@ -32,6 +32,7 @@ public sealed record LayoutOption(LayoutStyle Style, string Name)
             LayoutStyle.RoomAndCorridor => "Room and corridor",
             LayoutStyle.CellularAutomataCaves => "Cellular automata caves",
             LayoutStyle.Forest => "Forest",
+            LayoutStyle.WeightedKruskal => "Weighted Kruskal",
             _ => style.ToString()
         };
 

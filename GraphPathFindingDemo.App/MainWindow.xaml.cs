@@ -42,7 +42,8 @@ public partial class MainWindow : Window
             new WallDensityLayoutGenerator(LayoutStyle.DenseWalls, 0.1),
             new RoomAndCorridorLayoutGenerator(),
             new CellularAutomataLayoutGenerator(),
-            new ForestLayoutGenerator()
+            new ForestLayoutGenerator(),
+            new WeightedKruskalLayoutGenerator()
         );
 
         _viewModel = new MainViewModel(

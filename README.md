@@ -17,7 +17,7 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
 ## What the demo shows
 
 - A grid graph in which every cell is a node and every open passage is an edge.
-- Thirteen generated layouts, from perfect mazes to caves and disconnected groves.
+- Fourteen generated layouts, from perfect mazes to caves and disconnected groves.
 - Four searches, animated one node expansion at a time.
 - Terrain heights that make a passage cost more than a plain step.
 - A choice of heuristic for A*.
@@ -47,6 +47,7 @@ which every cell is reachable and `Edges.Count == Nodes.Count - 1`.
 | Wilson | Evenly drawn passages | Perfect maze |
 | Growing tree | Bushy tree | Perfect maze |
 | Hunt-and-kill | Long winding passages | Perfect maze |
+| Weighted Kruskal | A cheapest perfect maze whose passages follow low-cost ground | Perfect maze |
 | Braided | No dead ends | Loops |
 | Sparse walls | Open | Loops |
 | Dense walls | Narrow | Loops |
@@ -56,7 +57,9 @@ which every cell is reachable and `Edges.Count == Nodes.Count - 1`.
 
 The braided layout is a perfect maze with its dead ends knocked out. The sparse and dense wall layouts
 are a perfect maze with some spare walls knocked out. Because those layouts have loops, several routes
-may lead to the end and the searches can return different paths.
+may lead to the end and the searches can return different paths. The weighted Kruskal layout minimises
+the total climb over the whole maze, but not necessarily the cost of the route between the two
+endpoints.
 
 ### The cost model
 
@@ -196,7 +199,9 @@ GraphPathFindingDemo.Core/
 │  │  ├─ RecursiveDivisionLayoutGenerator.cs
 │  │  ├─ RoomAndCorridorLayoutGenerator.cs
 │  │  ├─ WallDensityLayoutGenerator.cs
+│  │  ├─ WeightedKruskalLayoutGenerator.cs
 │  │  └─ WilsonLayoutGenerator.cs
+│  ├─ IHeightAwareLayoutGenerator.cs
 │  ├─ ILayoutGenerator.cs
 │  └─ LayoutStyle.cs
 ├─ Pathfinding/
@@ -255,6 +260,7 @@ them to the `MainViewModel`. There is no DI container.
 
 - **Another layout** — implement `ILayoutGenerator` and return a `GridGraph` built with `Connect`.
   Add the generator to the list the `GridFactory` is built with and it appears in the layout picker.
+  A layout that needs the terrain implements `IHeightAwareLayoutGenerator` and receives the heights.
 - **Another search** — implement `ISearchAlgorithm` and name it through `ISearchAlgorithm.Style`.
   Add it to the composition root in `MainWindow` and it appears in the algorithm picker.
 - **Another heuristic** — implement `IHeuristic` and hand it to the `AStarSearch` in the composition
