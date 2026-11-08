@@ -3,57 +3,116 @@
 A Windows desktop demo that renders a square grid graph, animates a path finding search across it,
 and draws the resulting path. Its purpose is to illustrate the graph data structure and path finding.
 
+## Contents
+
+- [What the demo shows](#what-the-demo-shows)
+- [How it works](#how-it-works)
+- [Requirements](#requirements)
+- [Run it](#run-it)
+- [Using it](#using-it)
+- [Read-outs](#read-outs)
+- [Solution layout](#solution-layout)
+- [Extension points](#extension-points)
+
 ## What the demo shows
 
-- **The graph model** — every cell is a node, every open passage is an edge. Walls are not a
-  separate model: a wall is simply the *absence* of an edge between two orthogonal cells.
-- **A perfect maze** — the layout is picked in the side panel: recursive division, a recursive
-  backtracker, randomized Prim, Eller's algorithm, Wilson's algorithm, a growing tree or
-  hunt-and-kill. All seven produce a spanning tree: every cell is reachable from every other
-  cell, and `Edges.Count == Nodes.Count - 1` (visible in the read-outs as *Nodes* and *Edges*).
-  The braided maze is the exception: it is a perfect maze with its dead ends knocked out, so it
-  holds more passages than cells minus one and has loops. The sparse and dense wall mazes are
-  exceptions too: they are a perfect maze with some of its spare walls knocked out. The room and
-  corridor maze is a third exception: it is made of open rooms, so it holds even more
-  passages. The cave maze is a fourth: it is made of open caves with rock between them, so it
-  holds passages between the caves while the rock cells carry none at all. The forest maze is
-  the fifth: it holds several groves that never touch, so a search from one end of the grid to
-  the other ends without a path.
-- **The search in motion** — the search is stepped one move at a time. A move colours in one cell:
-  the cell the search reaches turns blue, and the neighbours it reveals turn amber. The cyan line
-  is the path found at the end.
-- **Endpoints of your own choosing** — the green and the red marker can be moved: a left-click on a
-  cell moves the start there, a right-click moves the end. The two never share a cell: a click on
-  the other endpoint does nothing. They stay where you put them when the maze is rebuilt — a new
-  layout, a new seed or a new grid — and when the search changes. A smaller grid pulls an
-  endpoint that no longer fits back to the bottom-right most cell that is free.
-- **Two searches, side by side** — the algorithm is picked in the side panel: breadth-first search,
-  depth-first search, Dijkstra's algorithm or A*. The breadth-first search explores the graph level by
-  level, so its frontier grows and the path it finds is the shortest one. The depth-first search
-  follows one branch as deep as it goes before it backtracks, so its frontier holds a single cell
-  and the path it finds is often a longer way round. Dijkstra always leaves the cheapest cell it
-  knows, so it finds the least costly path. A* leaves the cell that promises the cheapest way to
-  the end, so it finds the same path as Dijkstra while looking at far fewer cells.
-- **The ground under the maze** — the cells do not all stand at the same height. The terrain is a
-  field of hills that the same seed always builds the same way, and a passage costs one for the
-  step plus the climb between its two cells. The read-out *Path cost* adds up what the passages of
-  the path cost, so it is worth more than the number of cells on it. In a maze with loops the
-  cheapest path and the shortest one can differ: the shortest one may climb more than the cheapest
-  one, and it is worth more.
-- **The estimate A* trusts** — the heuristic is picked in a second picker, which only appears while
-  A* is the chosen algorithm. The *Terrain* estimate is the distance across the grid plus the
-  difference of the heights: every remaining step costs at least one, and the climb a walk makes
-  in total is at least the difference of the two heights, so the estimate never promises more than
-  the truth. A* therefore still finds the cheapest path, and it never looks at a cell twice. The
-  *Manhattan*, *Euclidean*, *Chebyshev* and *Octile* estimates are there for the same reason, and
-  they show what a looser estimate costs: the path comes out the same, but far more cells are
-  looked at.
-- **Why BFS is optimal here** — in a perfect maze the shortest path is the *only* path, so BFS's
-  optimality is never confused by a tie-break between equally short routes, and the depth-first
-  and the cheapest path are the very same one. The braided, sparse, dense wall, room and corridor
-  and cave mazes are the exceptions: they have loops, so several routes of the same length may
-  lead to the end, and the searches can come out with different paths. The forest maze goes
-  further: it has no path at all, and the status reads `no path`.
+- A grid graph in which every cell is a node and every open passage is an edge.
+- Thirteen generated layouts, from perfect mazes to caves and disconnected groves.
+- Four searches, animated one node expansion at a time.
+- Terrain heights that make a passage cost more than a plain step.
+- A choice of heuristic for A*.
+
+## How it works
+
+### The graph model
+
+Every cell is a node and every open passage is an edge. Walls are not a separate model: a wall is
+simply the *absence* of an edge between two orthogonal cells.
+
+`GridGraph` creates the nodes row by row and exposes `Nodes`, `Edges` and `Neighbors`. Layout
+generators add passages through `Connect`. `ApplyHeights` then sets each node's height and works out
+what every passage costs.
+
+### Layouts
+
+The layout is picked in the side panel. Most generators produce a perfect maze: a spanning tree in
+which every cell is reachable and `Edges.Count == Nodes.Count - 1`.
+
+| Layout | Appearance | Graph property |
+| --- | --- | --- |
+| Recursive division | Boxes joined by single openings | Perfect maze |
+| Recursive backtracker | Long corridors | Perfect maze |
+| Randomized Prim | Blobby tree | Perfect maze |
+| Eller | Built row by row | Perfect maze |
+| Wilson | Evenly drawn passages | Perfect maze |
+| Growing tree | Bushy tree | Perfect maze |
+| Hunt-and-kill | Long winding passages | Perfect maze |
+| Braided | No dead ends | Loops |
+| Sparse walls | Open | Loops |
+| Dense walls | Narrow | Loops |
+| Room and corridor | Open rooms joined by doors | Loops |
+| Cellular automata caves | Organic caves with rock between them | Loops, with rock cells carrying no passages |
+| Forest | Separate groves | Disconnected; no path between groves |
+
+The braided layout is a perfect maze with its dead ends knocked out. The sparse and dense wall layouts
+are a perfect maze with some spare walls knocked out. Because those layouts have loops, several routes
+may lead to the end and the searches can return different paths.
+
+### The cost model
+
+The cells do not all stand at the same height. `HeightField` builds a smooth field of hills, and every
+passage costs
+
+```
+1 + abs(height difference)
+```
+
+so the read-out *Path cost* is worth more than the number of cells on the path. In a layout with loops
+the cheapest path and the shortest path can differ: the shortest one may climb more and cost more.
+
+The same seed drives both the layout generator and the height field, so a seed reproduces the whole
+scene.
+
+### The searches
+
+| Search | Strategy | Result |
+| --- | --- | --- |
+| Breadth-first search | Explores level by level with a queue | Shortest path |
+| Depth-first search | Follows one branch as deep as it goes | Any path, often a longer way round |
+| Dijkstra | Always expands the cheapest cell known | Least costly path |
+| A* | Expands the cell with the cheapest cost plus estimate | Same path as Dijkstra, far fewer cells expanded |
+
+In a perfect maze the shortest path is the only path, so the shortest and the cheapest path coincide.
+In a layout with loops they can differ. In the forest layout the search ends without a path and the
+status reads `no path`.
+
+### The search in motion
+
+A search is an `IEnumerable<SearchStep>`. The algorithm yields one step per event as it runs.
+
+- `Discovered` — a neighbour enters the frontier and is drawn amber.
+- `Visited` — a node is expanded and is drawn blue.
+- `PathFound` — the path is complete and is drawn cyan.
+
+A *move* is the expansion of one node, together with the neighbours it reveals. The view model
+advances the sequence one move per display frame, subject to the step interval. `Reset` discards the
+sequence and starts the same search over the same graph.
+
+### Heuristics
+
+The heuristic picker appears only while A* is the chosen search. Every heuristic has to stay under
+the true remaining cost, or A* can no longer promise the cheapest path.
+
+| Heuristic | Estimate |
+| --- | --- |
+| Terrain | `rows + columns + abs(height difference)` |
+| Manhattan | `rows + columns` |
+| Euclidean | `floor(sqrt(rows² + columns²))` |
+| Chebyshev | `max(rows, columns)` |
+| Octile | `floor(max(rows, columns) + (√2 − 1) × min(rows, columns))` |
+
+Terrain is the tightest estimate and is consistent, so A* never has to look at a cell twice. The
+others are admissible but looser: the path stays the same while more cells are expanded.
 
 ## Requirements
 
@@ -76,30 +135,34 @@ dotnet build -c Release
 
 | Control | Effect |
 | --- | --- |
-| **Layout** | The maze generator: recursive division (boxes and corridors), recursive backtracker (long corridors), randomized Prim (blobby), Eller (row by row), Wilson (evenly drawn), growing tree (bushy), hunt-and-kill (long winding passages), braided (no dead ends), sparse walls (open), dense walls (narrow), room and corridor (open rooms joined by doors) or
-cellular automata caves (organic caves with rock between them) or forest (separate groves, no
-path between them). Changing it rebuilds the maze and resets the search. |
-| **Algorithm** | The search: breadth-first search (level by level, shortest path), depth-first
-search (one branch at a time, any path), Dijkstra (always the cheapest way out, least costly
-path) or A* (guided by a heuristic, the least costly path with far fewer cells looked at).
-Changing it restarts the search. |
-| **Endpoints** | The two read-only fields show where the ends of the search stand. A left-click on the
-grid moves the start, a right-click moves the end; a click on the other endpoint does nothing. The
-endpoints keep their places when the maze or the search changes. |
-| **Heuristic** | The estimate A* trusts: terrain (the distance across the grid plus the climb),
-Manhattan, Euclidean, Chebyshev or Octile. The picker only shows while A* is the chosen algorithm.
-Changing it restarts the search. |
+| **Layout** | The maze generator. Changing it rebuilds the maze and resets the search. |
+| **Algorithm** | The search. Changing it restarts the search. |
+| **Heuristic** | The estimate A* trusts. The picker only shows while A* is chosen. Changing it restarts the search. |
+| **Endpoints** | The read-only fields show where the search starts and ends. A left-click moves the start; a right-click moves the end. |
 | **Width** / **Height** | Grid size, 5–100 per axis. Changing either rebuilds the maze and resets the search. |
-| **Seed** | Seed for the layout generator and for the terrain. The same seed always produces the same maze and the same ground. A new run starts with the current epoch time in seconds. |
-| **New Grid** | Builds a new maze from a new seed, which is derived from the current one. |
-| **Play** / **Pause** | Runs or freezes the search. Only one of the two shows at a time: the pause button takes the place of the play button while the search runs. |
+| **Seed** | Seed for the layout generator and the terrain. A new run starts with the current epoch time in seconds. |
+| **New Grid** | Builds a new maze from a new seed, derived from the current one. |
+| **Play** / **Pause** | Runs or freezes the search. Only one of the two shows at a time. |
 | **Step** | Advances the search by exactly one move. |
 | **Reset** | Returns the *same* maze to its pre-search state so a run can be replayed identically. |
-| **Step interval** | Milliseconds between two moves of the search (0–1000, in steps of 50). Lower is faster. The moves are counted in display frames, so the time between two moves only varies by the jitter of the display. |
+| **Step interval** | Milliseconds between two moves, 0–1000 in steps of 50. Lower is faster. |
 
-The read-outs show the node and edge counts, how many cells have been visited, the current
-frontier size, the path length in segments, what the path costs to walk, and the status (`idle` /
-`running` / `done` / `no path`).
+Endpoint rules:
+
+- The two endpoints never share a cell. A click on the other endpoint does nothing.
+- The endpoints keep their places when the layout, seed, grid size or search changes.
+- A smaller grid moves an endpoint that no longer fits to the bottom-right most free cell.
+
+The grid controls are disabled while the search runs.
+
+## Read-outs
+
+- **Nodes** and **Edges** — counts for the current graph.
+- **Visited** — cells that have been expanded.
+- **Frontier** — cells queued but not yet expanded.
+- **Path length** — the number of segments on the path.
+- **Path cost** — the sum of the passage weights along the path.
+- **Status** — `idle`, `running`, `done` or `no path`.
 
 ## Solution layout
 
@@ -109,54 +172,60 @@ The graph model and the algorithms, with no UI dependencies.
 
 ```
 GraphPathFindingDemo.Core/
-├─ Graph/
-│  ├─ GridNode.cs
-│  ├─ GridEdge.cs
-│  └─ GridGraph.cs
-├─ Layout/
-│  ├─ ILayoutGenerator.cs
-│  ├─ LayoutStyle.cs
-│  ├─ RecursiveDivisionLayoutGenerator.cs
-│  ├─ RecursiveBacktrackerLayoutGenerator.cs
-│  ├─ RandomizedPrimLayoutGenerator.cs
-│  ├─ EllerLayoutGenerator.cs
-│  ├─ WilsonLayoutGenerator.cs
-│  ├─ GrowingTreeLayoutGenerator.cs
-│  ├─ HuntAndKillLayoutGenerator.cs
-│  ├─ BraidedLayoutGenerator.cs
-│  ├─ WallDensityLayoutGenerator.cs
-│  ├─ RoomAndCorridorLayoutGenerator.cs
-│  ├─ CellularAutomataLayoutGenerator.cs
-│  └─ ForestLayoutGenerator.cs
-├─ Pathfinding/
-│  ├─ ISearchAlgorithm.cs
-│  ├─ SearchAlgorithmStyle.cs
-│  ├─ SearchStep.cs
-│  ├─ SearchStepKind.cs
-│  ├─ PathBuilder.cs
-│  ├─ IHeuristic.cs
-│  ├─ IHeuristicSearch.cs
-│  ├─ GridDistanceHeuristic.cs
-│  ├─ TerrainHeuristic.cs
-│  ├─ ManhattanHeuristic.cs
-│  ├─ EuclideanHeuristic.cs
-│  ├─ ChebyshevHeuristic.cs
-│  ├─ OctileHeuristic.cs
-│  ├─ BreadthFirstSearch.cs
-│  ├─ DepthFirstSearch.cs
-│  ├─ DijkstraSearch.cs
-│  └─ AStarSearch.cs
-├─ Terrain/
-│  └─ HeightField.cs
 ├─ Endpoints/
 │  └─ EndpointSelector.cs
-└─ Factories/
-   ├─ IGridFactory.cs
-   ├─ GridScenario.cs
-   └─ GridFactory.cs
+├─ Factories/
+│  ├─ GridFactory.cs
+│  ├─ GridScenario.cs
+│  └─ IGridFactory.cs
+├─ Graph/
+│  ├─ GridEdge.cs
+│  ├─ GridGraph.cs
+│  └─ GridNode.cs
+├─ Layout/
+│  ├─ DisjointSets.cs
+│  ├─ Generator/
+│  │  ├─ BraidedLayoutGenerator.cs
+│  │  ├─ CellularAutomataLayoutGenerator.cs
+│  │  ├─ EllerLayoutGenerator.cs
+│  │  ├─ ForestLayoutGenerator.cs
+│  │  ├─ GrowingTreeLayoutGenerator.cs
+│  │  ├─ HuntAndKillLayoutGenerator.cs
+│  │  ├─ RandomizedPrimLayoutGenerator.cs
+│  │  ├─ RecursiveBacktrackerLayoutGenerator.cs
+│  │  ├─ RecursiveDivisionLayoutGenerator.cs
+│  │  ├─ RoomAndCorridorLayoutGenerator.cs
+│  │  ├─ WallDensityLayoutGenerator.cs
+│  │  └─ WilsonLayoutGenerator.cs
+│  ├─ ILayoutGenerator.cs
+│  └─ LayoutStyle.cs
+├─ Pathfinding/
+│  ├─ GridDistanceHeuristic.cs
+│  ├─ Heuristic/
+│  │  ├─ ChebyshevHeuristic.cs
+│  │  ├─ EuclideanHeuristic.cs
+│  │  ├─ ManhattanHeuristic.cs
+│  │  ├─ OctileHeuristic.cs
+│  │  └─ TerrainHeuristic.cs
+│  ├─ IHeuristic.cs
+│  ├─ IHeuristicSearch.cs
+│  ├─ ISearchAlgorithm.cs
+│  ├─ PathBuilder.cs
+│  ├─ Search/
+│  │  ├─ AStarSearch.cs
+│  │  ├─ BreadthFirstSearch.cs
+│  │  ├─ DepthFirstSearch.cs
+│  │  └─ DijkstraSearch.cs
+│  ├─ SearchAlgorithmStyle.cs
+│  ├─ SearchStep.cs
+│  └─ SearchStepKind.cs
+└─ Terrain/
+   └─ HeightField.cs
 ```
 
 `GridNode.cs` also holds `GridPoint` — a node owns its coordinate, so the two are inseparable.
+`DisjointSets` is the union-find used by the Eller and forest generators. `GridDistanceHeuristic` is
+the abstract base shared by the distance-based heuristics.
 
 ### `GraphPathFindingDemo.App` (`net10.0-windows`, WPF)
 
@@ -164,19 +233,19 @@ The view model, the custom-drawn canvas, and the window that composes them.
 
 ```
 GraphPathFindingDemo.App/
-├─ ViewModels/
-│  ├─ MainViewModel.cs
-│  ├─ RenderState.cs
-│  ├─ LayoutOption.cs
-│  ├─ SearchAlgorithmOption.cs
-│  └─ EndpointTarget.cs
-├─ Controls/
-│  ├─ GridCanvas.cs
-│  └─ CellClickedEventArgs.cs
 ├─ App.xaml
 ├─ App.xaml.cs
+├─ Controls/
+│  ├─ CellClickedEventArgs.cs
+│  └─ GridCanvas.cs
 ├─ MainWindow.xaml
-└─ MainWindow.xaml.cs
+├─ MainWindow.xaml.cs
+└─ ViewModels/
+   ├─ EndpointTarget.cs
+   ├─ LayoutOption.cs
+   ├─ MainViewModel.cs
+   ├─ RenderState.cs
+   └─ SearchAlgorithmOption.cs
 ```
 
 `MainWindow` is the composition root: it creates the `GridFactory` and the search algorithms and hands
@@ -184,16 +253,12 @@ them to the `MainViewModel`. There is no DI container.
 
 ## Extension points
 
-- **Another layout** (braided, sparse, dense, room and corridor, caves, forest) — implement
-  `ILayoutGenerator` and return a `GridGraph` built with `Connect`. A generator names the layout
-  it produces through `ILayoutGenerator.Style`; add it to the list the `GridFactory` is built
-  with and it appears in the layout picker.
-- **Another algorithm** — implement `ISearchAlgorithm` and name it through
-  `ISearchAlgorithm.Style`. `MainViewModel` takes the searches it offers as a list, so adding one
-  to the composition root in `MainWindow` puts it in the algorithm picker.
-- **Another heuristic** (Manhattan, Euclidean, a perfect estimate from a backward Dijkstra run) —
-  implement `IHeuristic` and hand it to the `AStarSearch` in the composition root. It lands in the
-  heuristic picker on its own. An estimate has to stay under the truth, or A* can no longer promise
-  the cheapest path.
-- **Other terrain** — `HeightField` builds the hills; a different field only has to hand the
-  factory another set of heights.
+- **Another layout** — implement `ILayoutGenerator` and return a `GridGraph` built with `Connect`.
+  Add the generator to the list the `GridFactory` is built with and it appears in the layout picker.
+- **Another search** — implement `ISearchAlgorithm` and name it through `ISearchAlgorithm.Style`.
+  Add it to the composition root in `MainWindow` and it appears in the algorithm picker.
+- **Another heuristic** — implement `IHeuristic` and hand it to the `AStarSearch` in the composition
+  root. It lands in the heuristic picker on its own. An estimate has to stay under the truth, or A*
+  can no longer promise the cheapest path.
+- **Other terrain** — `HeightField` builds the hills; a different field only has to hand the factory
+  another set of heights.
