@@ -155,31 +155,6 @@ public sealed class GridCanvas : Control
     /// </summary>
     private sealed class TerrainLayer
     {
-        #region Constructor
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TerrainLayer"/> class.
-        /// </summary>
-        /// <param name="graph">The graph the ground belongs to.</param>
-        /// <param name="levels">The geometry of every height of the ground.</param>
-        /// <param name="cellSize">The size of a single cell.</param>
-        /// <param name="offsetX">The left edge of the grid.</param>
-        /// <param name="offsetY">The top edge of the grid.</param>
-        public TerrainLayer(
-            GridGraph graph,
-            StreamGeometry[] levels,
-            double cellSize,
-            double offsetX,
-            double offsetY)
-        {
-            Graph = graph;
-            Levels = levels;
-            CellSize = cellSize;
-            OffsetX = offsetX;
-            OffsetY = offsetY;
-        }
-        #endregion Constructor
-
-        #region Properties
         /// <summary>
         /// Gets the graph the ground belongs to.
         /// </summary>
@@ -204,7 +179,28 @@ public sealed class GridCanvas : Control
         /// Gets the top edge of the grid the ground was built for.
         /// </summary>
         public double OffsetY { get; }
-        #endregion Properties
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TerrainLayer"/> class.
+        /// </summary>
+        /// <param name="graph">The graph the ground belongs to.</param>
+        /// <param name="levels">The geometry of every height of the ground.</param>
+        /// <param name="cellSize">The size of a single cell.</param>
+        /// <param name="offsetX">The left edge of the grid.</param>
+        /// <param name="offsetY">The top edge of the grid.</param>
+        public TerrainLayer(
+            GridGraph graph,
+            StreamGeometry[] levels,
+            double cellSize,
+            double offsetX,
+            double offsetY)
+        {
+            Graph = graph;
+            Levels = levels;
+            CellSize = cellSize;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+        }
     }
 
     /// <summary>
@@ -213,34 +209,6 @@ public sealed class GridCanvas : Control
     /// </summary>
     private sealed class WallLayer
     {
-        #region Constructor
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WallLayer"/> class.
-        /// </summary>
-        /// <param name="graph">The graph the walls belong to.</param>
-        /// <param name="geometry">The geometry of the walls.</param>
-        /// <param name="pen">The pen the walls are stroked with.</param>
-        /// <param name="cellSize">The size of a single cell.</param>
-        /// <param name="offsetX">The left edge of the grid.</param>
-        /// <param name="offsetY">The top edge of the grid.</param>
-        public WallLayer(
-            GridGraph graph,
-            StreamGeometry geometry,
-            Pen pen,
-            double cellSize,
-            double offsetX,
-            double offsetY)
-        {
-            Graph = graph;
-            Geometry = geometry;
-            Pen = pen;
-            CellSize = cellSize;
-            OffsetX = offsetX;
-            OffsetY = offsetY;
-        }
-        #endregion Constructor
-
-        #region Properties
         /// <summary>
         /// Gets the graph the walls belong to.
         /// </summary>
@@ -270,7 +238,31 @@ public sealed class GridCanvas : Control
         /// Gets the top edge of the grid the walls were built for.
         /// </summary>
         public double OffsetY { get; }
-        #endregion Properties
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WallLayer"/> class.
+        /// </summary>
+        /// <param name="graph">The graph the walls belong to.</param>
+        /// <param name="geometry">The geometry of the walls.</param>
+        /// <param name="pen">The pen the walls are stroked with.</param>
+        /// <param name="cellSize">The size of a single cell.</param>
+        /// <param name="offsetX">The left edge of the grid.</param>
+        /// <param name="offsetY">The top edge of the grid.</param>
+        public WallLayer(
+            GridGraph graph,
+            StreamGeometry geometry,
+            Pen pen,
+            double cellSize,
+            double offsetX,
+            double offsetY)
+        {
+            Graph = graph;
+            Geometry = geometry;
+            Pen = pen;
+            CellSize = cellSize;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+        }
     }
     #endregion Internal Classes
 

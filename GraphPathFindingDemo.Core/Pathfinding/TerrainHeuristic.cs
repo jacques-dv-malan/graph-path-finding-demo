@@ -26,7 +26,7 @@ public sealed class TerrainHeuristic : GridDistanceHeuristic
     public override string Name => "Terrain";
     #endregion Properties
 
-    #region Protected Methods
+    #region Overridden Members
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -43,5 +43,5 @@ public sealed class TerrainHeuristic : GridDistanceHeuristic
 
         return rows + columns + climb;
     }
-    #endregion Protected Methods
+    #endregion Overridden Members
 }

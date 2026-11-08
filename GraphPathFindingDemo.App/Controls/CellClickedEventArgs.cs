@@ -8,6 +8,18 @@ namespace GraphPathFindingDemo.App.Controls;
 /// </summary>
 public sealed class CellClickedEventArgs : EventArgs
 {
+    #region Properties
+    /// <summary>
+    /// Gets the cell that was clicked.
+    /// </summary>
+    public GridPoint Point { get; }
+
+    /// <summary>
+    /// Gets the endpoint the click moves.
+    /// </summary>
+    public EndpointTarget Target { get; }
+    #endregion Properties
+
     #region Constructor
     /// <summary>
     /// Initializes a new instance of the <see cref="CellClickedEventArgs"/> class.
@@ -20,16 +32,4 @@ public sealed class CellClickedEventArgs : EventArgs
         Target = target;
     }
     #endregion Constructor
-
-    #region Properties
-    /// <summary>
-    /// Gets the cell that was clicked.
-    /// </summary>
-    public GridPoint Point { get; }
-
-    /// <summary>
-    /// Gets the endpoint the click moves.
-    /// </summary>
-    public EndpointTarget Target { get; }
-    #endregion Properties
 }

@@ -35,7 +35,7 @@ public abstract class GridDistanceHeuristic : IHeuristic
     }
     #endregion Public Methods
 
-    #region Protected Methods
+    #region Abstract Methods
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -43,5 +43,5 @@ public abstract class GridDistanceHeuristic : IHeuristic
     /// <param name="to">The cell the walk ends at.</param>
     /// <returns>The estimated cost of the walk.</returns>
     protected abstract int Estimate(GridNode from, GridNode to);
-    #endregion Protected Methods
+    #endregion Abstract Methods
 }

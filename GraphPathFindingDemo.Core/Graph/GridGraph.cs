@@ -158,9 +158,7 @@ public sealed class GridGraph
 
         return passage.Weight;
     }
-    #endregion Public Methods
 
-    #region Internal Methods
     /// <summary>
     /// Adds a passage between two orthogonal nodes. Used by layout generators to build the graph.
     /// </summary>
@@ -171,7 +169,7 @@ public sealed class GridGraph
     /// A node does not belong to this graph, or the two nodes are not orthogonal neighbours.
     /// </exception>
     /// <exception cref="InvalidOperationException">The two nodes are already connected.</exception>
-    internal void Connect(GridNode a, GridNode b, int weight = 1)
+    public void Connect(GridNode a, GridNode b, int weight = 1)
     {
         if (!Owns(a) || !Owns(b))
         {
@@ -206,7 +204,7 @@ public sealed class GridGraph
     /// <exception cref="ArgumentException">
     /// There is not exactly one height for every node of the graph.
     /// </exception>
-    internal void ApplyHeights(IReadOnlyList<int> heights)
+    public void ApplyHeights(IReadOnlyList<int> heights)
     {
         ArgumentNullException.ThrowIfNull(heights);
 
@@ -227,7 +225,7 @@ public sealed class GridGraph
             passage.Weight = CostOf(passage.From, passage.To);
         }
     }
-    #endregion Internal Methods
+    #endregion Public Methods
 
     #region Private Methods
     /// <summary>

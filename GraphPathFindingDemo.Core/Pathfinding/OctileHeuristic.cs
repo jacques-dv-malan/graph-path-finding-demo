@@ -31,7 +31,7 @@ public sealed class OctileHeuristic : GridDistanceHeuristic
     public override string Name => "Octile";
     #endregion Properties
 
-    #region Protected Methods
+    #region Overridden Members
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -50,5 +50,5 @@ public sealed class OctileHeuristic : GridDistanceHeuristic
 
         return (int)Math.Floor(distance);
     }
-    #endregion Protected Methods
+    #endregion Overridden Members
 }

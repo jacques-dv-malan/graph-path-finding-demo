@@ -17,7 +17,7 @@ public sealed class ChebyshevHeuristic : GridDistanceHeuristic
     public override string Name => "Chebyshev";
     #endregion Properties
 
-    #region Protected Methods
+    #region Overridden Members
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -31,5 +31,5 @@ public sealed class ChebyshevHeuristic : GridDistanceHeuristic
 
         return Math.Max(rows, columns);
     }
-    #endregion Protected Methods
+    #endregion Overridden Members
 }

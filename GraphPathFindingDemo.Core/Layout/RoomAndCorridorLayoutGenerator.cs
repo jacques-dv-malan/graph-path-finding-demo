@@ -32,6 +32,15 @@ public sealed class RoomAndCorridorLayoutGenerator : ILayoutGenerator
     public LayoutStyle Style => LayoutStyle.RoomAndCorridor;
     #endregion Properties
 
+    #region Internal Classes
+    /// <summary>
+    /// A band of rows or columns, from its first cell to its last.
+    /// </summary>
+    /// <param name="Start">The first row or column of the band.</param>
+    /// <param name="End">The last row or column of the band.</param>
+    private readonly record struct Band(int Start, int End);
+    #endregion Internal Classes
+
     #region Public Methods
     /// <summary>
     /// Generates a maze for the requested grid.
@@ -209,13 +218,4 @@ public sealed class RoomAndCorridorLayoutGenerator : ILayoutGenerator
         return bands;
     }
     #endregion Private Methods
-
-    #region Internal Classes
-    /// <summary>
-    /// A band of rows or columns, from its first cell to its last.
-    /// </summary>
-    /// <param name="Start">The first row or column of the band.</param>
-    /// <param name="End">The last row or column of the band.</param>
-    private readonly record struct Band(int Start, int End);
-    #endregion Internal Classes
 }

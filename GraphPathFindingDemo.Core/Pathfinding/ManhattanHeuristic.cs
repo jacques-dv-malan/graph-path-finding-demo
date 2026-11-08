@@ -17,7 +17,7 @@ public sealed class ManhattanHeuristic : GridDistanceHeuristic
     public override string Name => "Manhattan";
     #endregion Properties
 
-    #region Protected Methods
+    #region Overridden Members
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -31,5 +31,5 @@ public sealed class ManhattanHeuristic : GridDistanceHeuristic
 
         return rows + columns;
     }
-    #endregion Protected Methods
+    #endregion Overridden Members
 }

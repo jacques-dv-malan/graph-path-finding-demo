@@ -19,44 +19,6 @@ public sealed class RecursiveDivisionLayoutGenerator : ILayoutGenerator
     public LayoutStyle Style => LayoutStyle.RecursiveDivision;
     #endregion Properties
 
-    #region Public Methods
-    /// <summary>
-    /// Generates a maze for the requested grid.
-    /// </summary>
-    /// <param name="width">The number of columns to generate.</param>
-    /// <param name="height">The number of rows to generate.</param>
-    /// <param name="seed">The seed controlling the generated layout. The same seed always
-    /// produces the same maze.</param>
-    /// <returns>The generated graph.</returns>
-    public GridGraph Generate(int width, int height, int seed)
-    {
-        var graph = new GridGraph(width, height);
-        var division = new Division(width, height, new Random(seed));
-
-        Divide(division, 0, height - 1, 0, width - 1);
-
-        for (var row = 0; row < height; row++)
-        {
-            for (var column = 0; column < width; column++)
-            {
-                var cell = graph.NodeAt(new GridPoint(row, column));
-
-                if (column + 1 < width && !division.VerticalWalls[row, column])
-                {
-                    graph.Connect(cell, graph.NodeAt(new GridPoint(row, column + 1)));
-                }
-
-                if (row + 1 < height && !division.HorizontalWalls[row, column])
-                {
-                    graph.Connect(cell, graph.NodeAt(new GridPoint(row + 1, column)));
-                }
-            }
-        }
-
-        return graph;
-    }
-    #endregion Public Methods
-
     #region Internal Classes
     /// <summary>
     /// Holds the wall bookkeeping of a single division run.
@@ -105,6 +67,44 @@ public sealed class RecursiveDivisionLayoutGenerator : ILayoutGenerator
         public bool[,] HorizontalWalls { get; }
     }
     #endregion Internal Classes
+
+    #region Public Methods
+    /// <summary>
+    /// Generates a maze for the requested grid.
+    /// </summary>
+    /// <param name="width">The number of columns to generate.</param>
+    /// <param name="height">The number of rows to generate.</param>
+    /// <param name="seed">The seed controlling the generated layout. The same seed always
+    /// produces the same maze.</param>
+    /// <returns>The generated graph.</returns>
+    public GridGraph Generate(int width, int height, int seed)
+    {
+        var graph = new GridGraph(width, height);
+        var division = new Division(width, height, new Random(seed));
+
+        Divide(division, 0, height - 1, 0, width - 1);
+
+        for (var row = 0; row < height; row++)
+        {
+            for (var column = 0; column < width; column++)
+            {
+                var cell = graph.NodeAt(new GridPoint(row, column));
+
+                if (column + 1 < width && !division.VerticalWalls[row, column])
+                {
+                    graph.Connect(cell, graph.NodeAt(new GridPoint(row, column + 1)));
+                }
+
+                if (row + 1 < height && !division.HorizontalWalls[row, column])
+                {
+                    graph.Connect(cell, graph.NodeAt(new GridPoint(row + 1, column)));
+                }
+            }
+        }
+
+        return graph;
+    }
+    #endregion Public Methods
 
     #region Private Methods
     /// <summary>

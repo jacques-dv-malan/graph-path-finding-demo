@@ -13,27 +13,6 @@ namespace GraphPathFindingDemo.App.ViewModels;
 /// </remarks>
 public sealed class RenderState
 {
-    #region Constructor
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RenderState"/> class.
-    /// </summary>
-    /// <param name="scenario">The scenario being searched.</param>
-    /// <param name="discovered">The nodes on the frontier, reached but not yet expanded.</param>
-    /// <param name="visited">The nodes that have been expanded.</param>
-    /// <param name="path">The path found so far. Empty until the search succeeds.</param>
-    public RenderState(
-        GridScenario scenario,
-        IReadOnlyCollection<GridNode> discovered,
-        IReadOnlyList<GridNode> visited,
-        IReadOnlyList<GridNode> path)
-    {
-        Scenario = scenario;
-        Discovered = discovered;
-        Visited = visited;
-        Path = path;
-    }
-    #endregion Constructor
-
     #region Properties
     /// <summary>
     /// Gets the scenario being searched.
@@ -55,4 +34,25 @@ public sealed class RenderState
     /// </summary>
     public IReadOnlyList<GridNode> Path { get; }
     #endregion Properties
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RenderState"/> class.
+    /// </summary>
+    /// <param name="scenario">The scenario being searched.</param>
+    /// <param name="discovered">The nodes on the frontier, reached but not yet expanded.</param>
+    /// <param name="visited">The nodes that have been expanded.</param>
+    /// <param name="path">The path found so far. Empty until the search succeeds.</param>
+    public RenderState(
+        GridScenario scenario,
+        IReadOnlyCollection<GridNode> discovered,
+        IReadOnlyList<GridNode> visited,
+        IReadOnlyList<GridNode> path)
+    {
+        Scenario = scenario;
+        Discovered = discovered;
+        Visited = visited;
+        Path = path;
+    }
+    #endregion Constructor
 }

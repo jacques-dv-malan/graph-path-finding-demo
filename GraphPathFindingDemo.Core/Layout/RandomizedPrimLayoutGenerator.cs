@@ -35,6 +35,16 @@ public sealed class RandomizedPrimLayoutGenerator : ILayoutGenerator
     public LayoutStyle Style => LayoutStyle.RandomizedPrim;
     #endregion Properties
 
+    #region Internal Classes
+    /// <summary>
+    /// A passage that may be taken out of the region grown so far.
+    /// </summary>
+    /// <param name="From">The cell the passage starts at. It belongs to the region already
+    /// grown.</param>
+    /// <param name="To">The cell the passage ends at. It does not belong to the region yet.</param>
+    private readonly record struct Passage(GridNode From, GridNode To);
+    #endregion Internal Classes
+
     #region Public Methods
     /// <summary>
     /// Generates a maze for the requested grid.
@@ -112,14 +122,4 @@ public sealed class RandomizedPrimLayoutGenerator : ILayoutGenerator
         }
     }
     #endregion Private Methods
-
-    #region Internal Classes
-    /// <summary>
-    /// A passage that may be taken out of the region grown so far.
-    /// </summary>
-    /// <param name="From">The cell the passage starts at. It belongs to the region already
-    /// grown.</param>
-    /// <param name="To">The cell the passage ends at. It does not belong to the region yet.</param>
-    private readonly record struct Passage(GridNode From, GridNode To);
-    #endregion Internal Classes
 }

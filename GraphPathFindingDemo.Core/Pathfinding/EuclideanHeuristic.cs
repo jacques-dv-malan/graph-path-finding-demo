@@ -18,7 +18,7 @@ public sealed class EuclideanHeuristic : GridDistanceHeuristic
     public override string Name => "Euclidean";
     #endregion Properties
 
-    #region Protected Methods
+    #region Overridden Members
     /// <summary>
     /// Estimates the cost of the walk between two cells.
     /// </summary>
@@ -35,5 +35,5 @@ public sealed class EuclideanHeuristic : GridDistanceHeuristic
 
         return (int)Math.Floor(Math.Sqrt((rows * rows) + (columns * columns)));
     }
-    #endregion Protected Methods
+    #endregion Overridden Members
 }

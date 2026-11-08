@@ -24,6 +24,52 @@ public sealed class DepthFirstSearch : ISearchAlgorithm
     public SearchAlgorithmStyle Style => SearchAlgorithmStyle.DepthFirstSearch;
     #endregion Properties
 
+    #region Internal Classes
+    /// <summary>
+    /// One node on the branch the search is following, together with the neighbours of that node
+    /// that have not been looked at yet.
+    /// </summary>
+    private sealed class Branch
+    {
+        private readonly IReadOnlyList<GridNode> _neighbours;
+        private int _next;
+
+        /// <summary>
+        /// Gets the node at this point of the branch.
+        /// </summary>
+        public GridNode Node { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Branch"/> class.
+        /// </summary>
+        /// <param name="node">The node at this point of the branch.</param>
+        /// <param name="neighbours">The neighbours of the node.</param>
+        public Branch(GridNode node, IReadOnlyList<GridNode> neighbours)
+        {
+            Node = node;
+            _neighbours = neighbours;
+        }
+
+        /// <summary>
+        /// Takes the next neighbour of the node that has not been looked at yet.
+        /// </summary>
+        /// <param name="neighbour">The neighbour that was taken.</param>
+        /// <returns><see langword="true"/> when a neighbour was left to take.</returns>
+        public bool TryTakeNeighbour(out GridNode neighbour)
+        {
+            if (_next >= _neighbours.Count)
+            {
+                neighbour = null!;
+                return false;
+            }
+
+            neighbour = _neighbours[_next];
+            _next++;
+            return true;
+        }
+    }
+    #endregion Internal Classes
+
     #region Public Methods
     /// <summary>
     /// Searches the graph depth first, reporting one <see cref="SearchStep"/> per event.
@@ -97,58 +143,4 @@ public sealed class DepthFirstSearch : ISearchAlgorithm
         }
     }
     #endregion Public Methods
-
-    #region Internal Classes
-    /// <summary>
-    /// One node on the branch the search is following, together with the neighbours of that node
-    /// that have not been looked at yet.
-    /// </summary>
-    private sealed class Branch
-    {
-        #region Instance Fields
-        private readonly IReadOnlyList<GridNode> _neighbours;
-        private int _next;
-        #endregion Instance Fields
-
-        #region Constructor
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Branch"/> class.
-        /// </summary>
-        /// <param name="node">The node at this point of the branch.</param>
-        /// <param name="neighbours">The neighbours of the node.</param>
-        public Branch(GridNode node, IReadOnlyList<GridNode> neighbours)
-        {
-            Node = node;
-            _neighbours = neighbours;
-        }
-        #endregion Constructor
-
-        #region Properties
-        /// <summary>
-        /// Gets the node at this point of the branch.
-        /// </summary>
-        public GridNode Node { get; }
-        #endregion Properties
-
-        #region Public Methods
-        /// <summary>
-        /// Takes the next neighbour of the node that has not been looked at yet.
-        /// </summary>
-        /// <param name="neighbour">The neighbour that was taken.</param>
-        /// <returns><see langword="true"/> when a neighbour was left to take.</returns>
-        public bool TryTakeNeighbour(out GridNode neighbour)
-        {
-            if (_next >= _neighbours.Count)
-            {
-                neighbour = null!;
-                return false;
-            }
-
-            neighbour = _neighbours[_next];
-            _next++;
-            return true;
-        }
-        #endregion Public Methods
-    }
-    #endregion Internal Classes
 }
