@@ -56,6 +56,15 @@ public partial class MainWindow : Window
                 new ManhattanHeuristic(),
                 new EuclideanHeuristic(),
                 new ChebyshevHeuristic(),
+                new OctileHeuristic()),
+            new BidirectionalBreadthFirstSearch(),
+            new BidirectionalBreadthFirstDepthFirstSearch(),
+            new BidirectionalDijkstraSearch(),
+            new BidirectionalAStarSearch(
+                new TerrainHeuristic(),
+                new ManhattanHeuristic(),
+                new EuclideanHeuristic(),
+                new ChebyshevHeuristic(),
                 new OctileHeuristic()));
 
         GridCanvas.CellClicked += OnCellClicked;

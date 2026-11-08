@@ -24,5 +24,28 @@ public enum SearchAlgorithmStyle
     /// The search takes the way that promises the cheapest way to the end, guided by a
     /// heuristic.
     /// </summary>
-    AStarSearch
+    AStarSearch,
+
+    /// <summary>
+    /// Two searches grow level by level from the two ends and meet on a shortest path.
+    /// </summary>
+    BidirectionalBreadthFirstSearch,
+
+    /// <summary>
+    /// A breadth-first search from the start and a depth-first search from the end grow towards
+    /// each other and are joined at the first cell they share.
+    /// </summary>
+    BidirectionalBreadthFirstDepthFirstSearch,
+
+    /// <summary>
+    /// Two searches grow towards each other, always taking the cheapest way out, and meet on the
+    /// least costly path.
+    /// </summary>
+    BidirectionalDijkstraSearch,
+
+    /// <summary>
+    /// Two searches grow towards each other, guided by a heuristic, and meet on the least costly
+    /// path.
+    /// </summary>
+    BidirectionalAStarSearch,
 }

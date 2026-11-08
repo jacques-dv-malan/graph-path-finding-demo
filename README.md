@@ -18,7 +18,7 @@ and draws the resulting path. Its purpose is to illustrate the graph data struct
 
 - A grid graph in which every cell is a node and every open passage is an edge.
 - Fourteen generated layouts, from perfect mazes to caves and disconnected groves.
-- Four searches, animated one node expansion at a time.
+- Eight searches, animated one node expansion at a time.
 - Terrain heights that make a passage cost more than a plain step.
 - A choice of heuristic for A*.
 
@@ -84,6 +84,14 @@ scene.
 | Depth-first search | Follows one branch as deep as it goes | Any path, often a longer way round |
 | Dijkstra | Always expands the cheapest cell known | Least costly path |
 | A* | Expands the cell with the cheapest cost plus estimate | Same path as Dijkstra, far fewer cells expanded |
+| Bidirectional breadth-first search | Grows level by level from both endpoints | Shortest path |
+| Bidirectional Dijkstra | Grows from both endpoints, always expanding the cheapest cell known | Least costly path |
+| Bidirectional A* | Grows from both endpoints, guided by the heuristic | Least costly path, usually expanding fewer cells |
+| Bidirectional breadth-first / depth-first | Breadth-first from the start, depth-first from the end | Any path, joined at the first cell the halves share |
+
+The mixed pair, like the single-ended breadth-first and depth-first searches, ignores the terrain
+weights. It joins the two halves at the first cell they share, so in a layout with loops the route
+need not be the shortest one.
 
 In a perfect maze the shortest path is the only path, so the shortest and the cheapest path coincide.
 In a layout with loops they can differ. In the forest layout the search ends without a path and the
@@ -103,7 +111,7 @@ sequence and starts the same search over the same graph.
 
 ### Heuristics
 
-The heuristic picker appears only while A* is the chosen search. Every heuristic has to stay under
+The heuristic picker appears only while an A* search is the chosen search. Every heuristic has to stay under
 the true remaining cost, or A* can no longer promise the cheapest path.
 
 | Heuristic | Estimate |
@@ -140,7 +148,7 @@ dotnet build -c Release
 | --- | --- |
 | **Layout** | The maze generator. Changing it rebuilds the maze and resets the search. |
 | **Algorithm** | The search. Changing it restarts the search. |
-| **Heuristic** | The estimate A* trusts. The picker only shows while A* is chosen. Changing it restarts the search. |
+| **Heuristic** | The estimate A* trusts. The picker only shows while an A* search is chosen. Changing it restarts the search. |
 | **Endpoints** | The read-only fields show where the search starts and ends. A left-click moves the start; a right-click moves the end. |
 | **Width** / **Height** | Grid size, 5–100 per axis. Changing either rebuilds the maze and resets the search. |
 | **Seed** | Seed for the layout generator and the terrain. A new run starts with the current epoch time in seconds. |
@@ -218,6 +226,11 @@ GraphPathFindingDemo.Core/
 │  ├─ PathBuilder.cs
 │  ├─ Search/
 │  │  ├─ AStarSearch.cs
+│  │  ├─ BidirectionalAStarSearch.cs
+│  │  ├─ BidirectionalBreadthFirstDepthFirstSearch.cs
+│  │  ├─ BidirectionalBreadthFirstSearch.cs
+│  │  ├─ BidirectionalDijkstraSearch.cs
+│  │  ├─ BidirectionalSearchDriver.cs
 │  │  ├─ BreadthFirstSearch.cs
 │  │  ├─ DepthFirstSearch.cs
 │  │  └─ DijkstraSearch.cs

@@ -23,6 +23,10 @@ public sealed record SearchAlgorithmOption(SearchAlgorithmStyle Style, string Na
             SearchAlgorithmStyle.DepthFirstSearch => "Depth-first search",
             SearchAlgorithmStyle.DijkstraSearch => "Dijkstra search",
             SearchAlgorithmStyle.AStarSearch => "A* search",
+            SearchAlgorithmStyle.BidirectionalBreadthFirstSearch => "Bidirectional breadth-first search",
+            SearchAlgorithmStyle.BidirectionalBreadthFirstDepthFirstSearch => "Bidirectional breadth-first / depth-first search",
+            SearchAlgorithmStyle.BidirectionalDijkstraSearch => "Bidirectional Dijkstra search",
+            SearchAlgorithmStyle.BidirectionalAStarSearch => "Bidirectional A* search",
             _ => style.ToString()
         };
 
