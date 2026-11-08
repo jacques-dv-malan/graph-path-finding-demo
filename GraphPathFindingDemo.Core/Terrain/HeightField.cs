@@ -40,7 +40,7 @@ public static class HeightField
     /// <param name="height">The number of rows of the grid.</param>
     /// <param name="seed">The seed the terrain is built from.</param>
     /// <returns>The height of every cell, in the order the nodes of the grid are created.</returns>
-    public static int[] Generate(int width, int height, int seed)
+    public static double[] Generate(int width, int height, int seed)
     {
         var random = new Random(seed);
         var coarse = CreateLattice(random, CoarseLatticeSize);
@@ -71,11 +71,11 @@ public static class HeightField
         // The hills are stretched over the whole range, so that the ground rises and falls as far
         // as it can.
         var span = Math.Max(double.Epsilon, highest - lowest);
-        var heights = new int[values.Length];
+        var heights = new double[values.Length];
 
         for (var index = 0; index < values.Length; index++)
         {
-            heights[index] = (int)Math.Round(((values[index] - lowest) / span) * MaxHeight);
+            heights[index] = ((values[index] - lowest) / span) * MaxHeight;
         }
 
         return heights;

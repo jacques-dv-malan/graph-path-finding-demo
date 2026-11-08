@@ -83,9 +83,9 @@ public sealed class AStarSearch : ISearchAlgorithm, IHeuristicSearch
         ArgumentNullException.ThrowIfNull(start);
         ArgumentNullException.ThrowIfNull(end);
 
-        var costs = new Dictionary<GridNode, int>();
+        var costs = new Dictionary<GridNode, double>();
         var cameFrom = new Dictionary<GridNode, GridNode?>();
-        var queue = new PriorityQueue<(GridNode Node, int Cost), (int Promise, int Estimate)>();
+        var queue = new PriorityQueue<(GridNode Node, double Cost), (double Promise, double Estimate)>();
 
         costs[start] = 0;
         cameFrom[start] = null;

@@ -41,9 +41,9 @@ public sealed class DijkstraSearch : ISearchAlgorithm
         ArgumentNullException.ThrowIfNull(start);
         ArgumentNullException.ThrowIfNull(end);
 
-        var costs = new Dictionary<GridNode, int>();
+        var costs = new Dictionary<GridNode, double>();
         var cameFrom = new Dictionary<GridNode, GridNode?>();
-        var queue = new PriorityQueue<GridNode, int>();
+        var queue = new PriorityQueue<GridNode, double>();
 
         costs[start] = 0;
         cameFrom[start] = null;

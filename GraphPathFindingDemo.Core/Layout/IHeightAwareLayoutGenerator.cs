@@ -21,5 +21,5 @@ public interface IHeightAwareLayoutGenerator : ILayoutGenerator
     /// The graph's own node heights and passage weights are applied by the factory afterwards,
     /// so a generator only needs the heights to choose which passages to open.
     /// </remarks>
-    GridGraph Generate(int width, int height, int seed, IReadOnlyList<int> heights);
+    GridGraph Generate(int width, int height, int seed, IReadOnlyList<double> heights);
 }

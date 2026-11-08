@@ -208,7 +208,7 @@ public partial class MainViewModel : ObservableObject
     /// Gets what the path found so far costs to walk, counted over the passages it runs through.
     /// </summary>
     [ObservableProperty]
-    private int _pathCost;
+    private double _pathCost;
 
     /// <summary>
     /// Gets the number of nodes in the current grid.
@@ -792,14 +792,14 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     /// <param name="path">The path to measure.</param>
     /// <returns>The cost of the path.</returns>
-    private int MeasureCost(IReadOnlyList<GridNode>? path)
+    private double MeasureCost(IReadOnlyList<GridNode>? path)
     {
         if (path is null || path.Count < 2)
         {
             return 0;
         }
 
-        var cost = 0;
+        var cost = 0.0;
 
         for (var index = 0; index + 1 < path.Count; index++)
         {

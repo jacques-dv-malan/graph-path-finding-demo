@@ -35,13 +35,13 @@ public sealed class TerrainHeuristic : GridDistanceHeuristic
     /// <returns>
     /// The distance across the grid plus the difference of the heights of the two cells.
     /// </returns>
-    protected override int Estimate(GridNode from, GridNode to)
+    protected override double Estimate(GridNode from, GridNode to)
     {
         var rows = Math.Abs(from.Row - to.Row);
         var columns = Math.Abs(from.Column - to.Column);
         var climb = Math.Abs(from.Height - to.Height);
 
-        return rows + columns + climb;
+        return GridMath.Estimate(rows + columns + climb);
     }
     #endregion Overridden Members
 }

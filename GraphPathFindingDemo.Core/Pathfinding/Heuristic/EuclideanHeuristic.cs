@@ -28,12 +28,12 @@ public sealed class EuclideanHeuristic : GridDistanceHeuristic
     /// The straight line between the two cells, rounded down so that it never promises more than
     /// the truth.
     /// </returns>
-    protected override int Estimate(GridNode from, GridNode to)
+    protected override double Estimate(GridNode from, GridNode to)
     {
         var rows = Math.Abs(from.Row - to.Row);
         var columns = Math.Abs(from.Column - to.Column);
 
-        return (int)Math.Floor(Math.Sqrt((rows * rows) + (columns * columns)));
+        return GridMath.Estimate(Math.Sqrt((rows * rows) + (columns * columns)));
     }
     #endregion Overridden Members
 }

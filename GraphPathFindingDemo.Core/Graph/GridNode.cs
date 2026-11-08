@@ -37,7 +37,7 @@ public sealed class GridNode
     /// Gets or sets the height of the ground this node stands on. The terrain sets it, and the
     /// search reads it to work out what a passage costs.
     /// </summary>
-    public int Height { get; internal set; }
+    public double Height { get; internal set; }
     #endregion Properties
 
     #region Constructor

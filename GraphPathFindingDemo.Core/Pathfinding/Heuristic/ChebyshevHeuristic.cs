@@ -24,12 +24,12 @@ public sealed class ChebyshevHeuristic : GridDistanceHeuristic
     /// <param name="from">The cell the walk starts at.</param>
     /// <param name="to">The cell the walk ends at.</param>
     /// <returns>The greater of the two distances across the grid.</returns>
-    protected override int Estimate(GridNode from, GridNode to)
+    protected override double Estimate(GridNode from, GridNode to)
     {
         var rows = Math.Abs(from.Row - to.Row);
         var columns = Math.Abs(from.Column - to.Column);
 
-        return Math.Max(rows, columns);
+        return GridMath.Estimate(Math.Max(rows, columns));
     }
     #endregion Overridden Members
 }

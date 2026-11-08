@@ -34,7 +34,7 @@ public sealed class WeightedKruskalLayoutGenerator : IHeightAwareLayoutGenerator
     /// <param name="To">The second cell of the passage.</param>
     /// <param name="Cost">The cost of walking the passage.</param>
     /// <param name="Rank">A random value that orders passages of the same cost.</param>
-    private readonly record struct Candidate(GridNode From, GridNode To, int Cost, int Rank);
+    private readonly record struct Candidate(GridNode From, GridNode To, double Cost, int Rank);
     #endregion Internal Classes
 
     #region Public Methods
@@ -70,7 +70,7 @@ public sealed class WeightedKruskalLayoutGenerator : IHeightAwareLayoutGenerator
     /// <exception cref="ArgumentException">
     /// <paramref name="heights"/> does not hold exactly one height for every node of the grid.
     /// </exception>
-    public GridGraph Generate(int width, int height, int seed, IReadOnlyList<int> heights)
+    public GridGraph Generate(int width, int height, int seed, IReadOnlyList<double> heights)
     {
         ArgumentNullException.ThrowIfNull(heights);
 
@@ -151,11 +151,11 @@ public sealed class WeightedKruskalLayoutGenerator : IHeightAwareLayoutGenerator
     private static void AddCandidate(
         List<Candidate> candidates,
         Random random,
-        IReadOnlyList<int> heights,
+        IReadOnlyList<double> heights,
         GridNode from,
         GridNode to)
     {
-        var cost = 1 + Math.Abs(heights[from.Index] - heights[to.Index]);
+        var cost = GridMath.Weight(1 + Math.Abs(heights[from.Index] - heights[to.Index]));
 
         candidates.Add(new Candidate(from, to, cost, random.Next()));
     }

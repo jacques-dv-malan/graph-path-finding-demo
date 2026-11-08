@@ -24,12 +24,12 @@ public sealed class ManhattanHeuristic : GridDistanceHeuristic
     /// <param name="from">The cell the walk starts at.</param>
     /// <param name="to">The cell the walk ends at.</param>
     /// <returns>The distance across the grid between the two cells.</returns>
-    protected override int Estimate(GridNode from, GridNode to)
+    protected override double Estimate(GridNode from, GridNode to)
     {
         var rows = Math.Abs(from.Row - to.Row);
         var columns = Math.Abs(from.Column - to.Column);
 
-        return rows + columns;
+        return GridMath.Estimate(rows + columns);
     }
     #endregion Overridden Members
 }

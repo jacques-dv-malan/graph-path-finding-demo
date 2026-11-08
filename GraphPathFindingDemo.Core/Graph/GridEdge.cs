@@ -12,6 +12,6 @@ public sealed record GridEdge(GridNode From, GridNode To)
     /// Gets or sets the cost of traversing the passage. It starts at <c>1</c>, and the terrain
     /// sets it once the heights are known.
     /// </summary>
-    public int Weight { get; internal set; } = 1;
+    public double Weight { get; internal set; } = 1.0;
     #endregion Properties
 }

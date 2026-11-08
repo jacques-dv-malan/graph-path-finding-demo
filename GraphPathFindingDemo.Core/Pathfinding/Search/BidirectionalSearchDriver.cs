@@ -25,7 +25,7 @@ internal static class BidirectionalSearchDriver
     /// <summary>
     /// The cost that stands for a half with no cell left to expand.
     /// </summary>
-    private const int Unreachable = int.MaxValue;
+    private const double Unreachable = double.PositiveInfinity;
     #endregion Constants
 
     #region Internal Classes
@@ -35,11 +35,11 @@ internal static class BidirectionalSearchDriver
     /// </summary>
     private sealed class Side
     {
-        private readonly Dictionary<GridNode, int> _costs = [];
+        private readonly Dictionary<GridNode, double> _costs = [];
         private readonly Dictionary<GridNode, GridNode?> _cameFrom = [];
         private readonly HashSet<GridNode> _settled = [];
-        private readonly PriorityQueue<(GridNode Node, int Cost), int> _queue = new();
-        private readonly PriorityQueue<GridNode, int> _bounds = new();
+        private readonly PriorityQueue<(GridNode Node, double Cost), double> _queue = new();
+        private readonly PriorityQueue<GridNode, double> _bounds = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Side"/> class.
@@ -66,7 +66,7 @@ internal static class BidirectionalSearchDriver
         /// Gets the cheapest cost of a cell this half has not expanded yet, or
         /// <see cref="Unreachable"/> when no such cell is left.
         /// </summary>
-        public int Bound
+        public double Bound
         {
             get
             {
@@ -96,7 +96,7 @@ internal static class BidirectionalSearchDriver
         /// the frontier is ordered by. An unguided half has no estimate, so its promise is the
         /// cost itself.
         /// </remarks>
-        public int Top
+        public double Top
         {
             get
             {
@@ -123,7 +123,7 @@ internal static class BidirectionalSearchDriver
         /// <param name="node">The cell to look up.</param>
         /// <param name="cost">When this method returns, the cost of the cell.</param>
         /// <returns><see langword="true"/> when the half has reached the cell.</returns>
-        public bool TryGetCost(GridNode node, out int cost)
+        public bool TryGetCost(GridNode node, out double cost)
         {
             return _costs.TryGetValue(node, out cost);
         }
@@ -142,7 +142,7 @@ internal static class BidirectionalSearchDriver
         /// ordered by something other than the cost. It is put back on the frontier then, so the
         /// search never closes a cell before its cost is final.
         /// </remarks>
-        public void Discover(GridNode node, GridNode? from, int cost, int priority)
+        public void Discover(GridNode node, GridNode? from, double cost, double priority)
         {
             _costs[node] = cost;
             _cameFrom[node] = from;
@@ -159,7 +159,7 @@ internal static class BidirectionalSearchDriver
         /// <param name="node">When this method returns, the cell to expand.</param>
         /// <param name="cost">When this method returns, the cost of the cell.</param>
         /// <returns><see langword="true"/> when the frontier held a cell to expand.</returns>
-        public bool TryTake(out GridNode node, out int cost)
+        public bool TryTake(out GridNode node, out double cost)
         {
             while (_queue.TryDequeue(out var entry, out _))
             {
@@ -270,7 +270,7 @@ internal static class BidirectionalSearchDriver
 
             if (bestCost != Unreachable
                 && (Math.Max(forwardTop, backwardTop) >= bestCost
-                    || (long)forwardBound + backwardBound >= bestCost))
+                    || forwardBound + backwardBound >= bestCost))
             {
                 break;
             }
@@ -294,7 +294,7 @@ internal static class BidirectionalSearchDriver
 
             foreach (var neighbour in graph.Neighbors(node))
             {
-                var step = useWeights ? graph.WeightBetween(node, neighbour) : 1;
+                var step = useWeights ? graph.WeightBetween(node, neighbour) : 1.0;
                 var next = cost + step;
 
                 if (side.TryGetCost(neighbour, out var known) && next >= known)
@@ -334,9 +334,9 @@ internal static class BidirectionalSearchDriver
     /// <param name="from">The cell the estimate is made for.</param>
     /// <param name="to">The endpoint the half grows towards.</param>
     /// <returns>The estimate, or <c>0</c> when the half is not guided.</returns>
-    private static int Estimate(GridGraph graph, IHeuristic? heuristic, GridNode from, GridNode to)
+    private static double Estimate(GridGraph graph, IHeuristic? heuristic, GridNode from, GridNode to)
     {
-        return heuristic is null ? 0 : heuristic.Estimate(graph, from, to);
+        return heuristic is null ? 0.0 : heuristic.Estimate(graph, from, to);
     }
 
     /// <summary>

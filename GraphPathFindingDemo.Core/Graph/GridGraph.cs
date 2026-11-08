@@ -147,7 +147,7 @@ public sealed class GridGraph
     /// <exception cref="ArgumentException">
     /// The two nodes are not joined by a passage.
     /// </exception>
-    public int WeightBetween(GridNode a, GridNode b)
+    public double WeightBetween(GridNode a, GridNode b)
     {
         if (!_passages.TryGetValue(PassageKey(a, b), out var passage))
         {
@@ -169,7 +169,7 @@ public sealed class GridGraph
     /// A node does not belong to this graph, or the two nodes are not orthogonal neighbours.
     /// </exception>
     /// <exception cref="InvalidOperationException">The two nodes are already connected.</exception>
-    public void Connect(GridNode a, GridNode b, int weight = 1)
+    public void Connect(GridNode a, GridNode b, double weight = 1.0)
     {
         if (!Owns(a) || !Owns(b))
         {
@@ -189,7 +189,7 @@ public sealed class GridGraph
                 $"Nodes ({a.Row}, {a.Column}) and ({b.Row}, {b.Column}) are already connected.");
         }
 
-        var passage = new GridEdge(a, b) { Weight = weight };
+        var passage = new GridEdge(a, b) { Weight = GridMath.Weight(weight) };
 
         _adjacency[a.Index].Add(b);
         _adjacency[b.Index].Add(a);
@@ -204,7 +204,7 @@ public sealed class GridGraph
     /// <exception cref="ArgumentException">
     /// There is not exactly one height for every node of the graph.
     /// </exception>
-    public void ApplyHeights(IReadOnlyList<int> heights)
+    public void ApplyHeights(IReadOnlyList<double> heights)
     {
         ArgumentNullException.ThrowIfNull(heights);
 
@@ -246,9 +246,9 @@ public sealed class GridGraph
     /// <param name="a">The cell the walk starts at.</param>
     /// <param name="b">The cell the walk ends at.</param>
     /// <returns>The cost of the walk.</returns>
-    private static int CostOf(GridNode a, GridNode b)
+    private static double CostOf(GridNode a, GridNode b)
     {
-        return 1 + Math.Abs(a.Height - b.Height);
+        return GridMath.Weight(1 + Math.Abs(a.Height - b.Height));
     }
 
     /// <summary>

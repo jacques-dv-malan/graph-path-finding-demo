@@ -37,7 +37,12 @@ public sealed class GridCanvas : Control
     public static readonly Color TerrainHighColor = Color.FromRgb(0x8F, 0xA3, 0xB5);
 
     /// <summary>
-    /// The colour of every height the terrain can reach, from the lowest to the highest.
+    /// The number of levels the continuous ground is drawn at.
+    /// </summary>
+    private const int TerrainLevels = 32;
+
+    /// <summary>
+    /// The colour of every level the terrain is drawn at, from the lowest to the highest.
     /// </summary>
     private static readonly Brush[] TerrainBrushes = BuildTerrainBrushes();
 
@@ -390,10 +395,9 @@ public sealed class GridCanvas : Control
         double offsetY,
         double cellSize)
     {
-        var heights = HeightField.MaxHeight + 1;
-        var geometries = new StreamGeometry[heights];
+        var geometries = new StreamGeometry[TerrainLevels];
 
-        for (var height = 0; height < heights; height++)
+        for (var level = 0; level < TerrainLevels; level++)
         {
             var geometry = new StreamGeometry();
 
@@ -405,7 +409,7 @@ public sealed class GridCanvas : Control
 
                     while (column < graph.Width)
                     {
-                        if (HeightOf(graph, row, column) != height)
+                        if (LevelOf(HeightOf(graph, row, column)) != level)
                         {
                             column++;
                             continue;
@@ -413,7 +417,7 @@ public sealed class GridCanvas : Control
 
                         var start = column;
 
-                        while (column < graph.Width && HeightOf(graph, row, column) == height)
+                        while (column < graph.Width && LevelOf(HeightOf(graph, row, column)) == level)
                         {
                             column++;
                         }
@@ -424,37 +428,49 @@ public sealed class GridCanvas : Control
             }
 
             geometry.Freeze();
-            geometries[height] = geometry;
+            geometries[level] = geometry;
         }
 
         return geometries;
     }
 
     /// <summary>
-    /// Returns the height of the ground at a place, held within the range the terrain reaches.
+    /// Returns the height of the ground at a place.
     /// </summary>
     /// <param name="graph">The graph the ground belongs to.</param>
     /// <param name="row">The row of the cell.</param>
     /// <param name="column">The column of the cell.</param>
     /// <returns>The height of the ground.</returns>
-    private static int HeightOf(GridGraph graph, int row, int column)
+    private static double HeightOf(GridGraph graph, int row, int column)
     {
-        var height = graph.Nodes[(row * graph.Width) + column].Height;
-
-        return Math.Clamp(height, 0, HeightField.MaxHeight);
+        return graph.Nodes[(row * graph.Width) + column].Height;
     }
 
     /// <summary>
-    /// Builds one brush for every height the terrain can reach.
+    /// Maps a height onto the level the ground is drawn at, held within the range the terrain
+    /// reaches.
     /// </summary>
-    /// <returns>The brush of every height, from the lowest to the highest.</returns>
+    /// <param name="height">The height of the ground.</param>
+    /// <returns>The level the ground is drawn at.</returns>
+    private static int LevelOf(double height)
+    {
+        var clamped = Math.Clamp(height, 0.0, HeightField.MaxHeight);
+        var level = (int)Math.Round((clamped / HeightField.MaxHeight) * (TerrainLevels - 1));
+
+        return Math.Clamp(level, 0, TerrainLevels - 1);
+    }
+
+    /// <summary>
+    /// Builds one brush for every level the terrain is drawn at.
+    /// </summary>
+    /// <returns>The brush of every level, from the lowest to the highest.</returns>
     private static Brush[] BuildTerrainBrushes()
     {
-        var brushes = new Brush[HeightField.MaxHeight + 1];
+        var brushes = new Brush[TerrainLevels];
 
-        for (var height = 0; height < brushes.Length; height++)
+        for (var level = 0; level < brushes.Length; level++)
         {
-            var amount = height / (double)HeightField.MaxHeight;
+            var amount = level / (double)(TerrainLevels - 1);
 
             var colour = Color.FromRgb(
                 (byte)(TerrainLowColor.R + ((TerrainHighColor.R - TerrainLowColor.R) * amount)),
@@ -464,7 +480,7 @@ public sealed class GridCanvas : Control
             var brush = new SolidColorBrush(colour);
             brush.Freeze();
 
-            brushes[height] = brush;
+            brushes[level] = brush;
         }
 
         return brushes;

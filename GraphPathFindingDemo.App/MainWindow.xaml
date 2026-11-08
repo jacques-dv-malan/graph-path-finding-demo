@@ -258,7 +258,7 @@
                         <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PathLength}" Margin="32,0,0,0" />
 
                         <TextBlock Grid.Row="5" Text="Path cost" Style="{StaticResource ReadOutLabel}" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PathCost}" Margin="32,0,0,0" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PathCost, StringFormat={}{0:0.####}}" Margin="32,0,0,0" />
 
                         <TextBlock Grid.Row="6" Text="Status" Style="{StaticResource ReadOutLabel}" />
                         <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Status}" FontWeight="SemiBold" Margin="32,0,0,0" />

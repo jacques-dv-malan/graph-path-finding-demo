@@ -16,5 +16,5 @@ namespace GraphPathFindingDemo.Core.Pathfinding;
 public readonly record struct SearchStep(
     GridNode Node,
     SearchStepKind Kind,
-    int? Distance,
+    double? Distance,
     IReadOnlyList<GridNode>? Path = null);

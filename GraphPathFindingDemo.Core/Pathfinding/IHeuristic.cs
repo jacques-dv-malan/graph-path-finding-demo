@@ -23,5 +23,5 @@ public interface IHeuristic
     /// <param name="from">The node the walk starts at.</param>
     /// <param name="to">The node the walk ends at.</param>
     /// <returns>The estimated cost of the walk.</returns>
-    int Estimate(GridGraph graph, GridNode from, GridNode to);
+    double Estimate(GridGraph graph, GridNode from, GridNode to);
 }

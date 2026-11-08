@@ -25,7 +25,7 @@ public abstract class GridDistanceHeuristic : IHeuristic
     /// <param name="to">The node the walk ends at.</param>
     /// <returns>The estimated cost of the walk.</returns>
     /// <exception cref="ArgumentNullException">Any of the arguments is <see langword="null"/>.</exception>
-    public int Estimate(GridGraph graph, GridNode from, GridNode to)
+    public double Estimate(GridGraph graph, GridNode from, GridNode to)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(from);
@@ -42,6 +42,6 @@ public abstract class GridDistanceHeuristic : IHeuristic
     /// <param name="from">The cell the walk starts at.</param>
     /// <param name="to">The cell the walk ends at.</param>
     /// <returns>The estimated cost of the walk.</returns>
-    protected abstract int Estimate(GridNode from, GridNode to);
+    protected abstract double Estimate(GridNode from, GridNode to);
     #endregion Abstract Methods
 }
